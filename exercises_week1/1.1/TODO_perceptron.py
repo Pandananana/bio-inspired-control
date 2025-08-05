@@ -17,7 +17,7 @@ We have provided the function signature for you.
 
 # Helper function to compute sigmoid
 def sigmoid(x):
-   return 1/(1 + np.exp(-x))
+   return 1 / (1 + np.exp(-x))
 
 class SignActivation(ActivationFunction):
    """ 
@@ -110,10 +110,7 @@ class Perceptron:
       """
       a = self.activation(x)
       y = self.output(a)
-      if y < 0:
-         return 0
-      else:
-         return 1
+      return y
 
    def gradient(self, a):
       """
@@ -129,93 +126,93 @@ if __name__ == '__main__':
    print(xdata)
    print(ydata)
    
-## TODO Test your activation function
-a = SignActivation()
-print("Sign Activation")
-print(a.forward(2))
-print(a.forward(0))
+   ## TODO Test your activation function
+   a = SignActivation()
+   print("Sign Activation")
+   print(a.forward(2))
+   print(a.forward(0))
 
-b = SigmoidActivation()
-print("")
-print("Sigmoid Activation")
-print(b.forward(2))
-print(b.forward(0))
+   b = SigmoidActivation()
+   print("")
+   print("Sigmoid Activation")
+   print(b.forward(2))
+   print(b.forward(0))
 
-c = LinearActivation()
-print("")
-print("Linear Activation")
-print(c.forward(2))
-print(c.forward(0))
-
-
-## TODO Test perceptron initialization
-p = Perceptron(2,LinearActivation)
-print("")
-print("Initial Weights")
-print(p.w)
-
-print("\nPredict")
-print(p.predict(xdata[0,:]))
-
-## TODO Learn the weights
-r = 0.001 # learning rate
-for epoch in range(10_000):
-   print("Epoch: ", epoch)
-   errors = np.zeros(len(xdata))
-   for i in range(len(xdata)):
-      t = ydata[i]
-      y = p.predict(xdata[i,:])
-      errors[i] = t - y
-      
-      # Fixed weight update: update bias and input weights separately
-      p.w[0] = p.w[0] + r * errors[i]  # bias update
-      p.w[1:] = p.w[1:] + r * errors[i] * xdata[i,:]  # input weights update
-   error_sum = np.sum(np.abs(errors))
-   if error_sum < 0.01:
-      break
-   print(" - Error: ", error_sum)
-
-# calculate the error and update the weights
-print("Final weights:", p.w)
+   c = LinearActivation()
+   print("")
+   print("Linear Activation")
+   print(c.forward(2))
+   print(c.forward(0))
 
 
-## TODO plot points and linear decision boundary
-plt.figure(figsize=(10, 8))
+   ## TODO Test perceptron initialization
+   p = Perceptron(2,SigmoidActivation)
+   print("")
+   print("Initial Weights")
+   print(p.w)
 
-# Separate data points by class
-class_0 = xdata[ydata == 0]
-class_1 = xdata[ydata == 1]
+   print("\nPredict")
+   print(p.predict(xdata[0,:]))
 
-# Plot data points with different colors
-plt.scatter(class_0[:, 0], class_0[:, 1], c='red', marker='o', s=100, label='Class 0', edgecolors='black')
-plt.scatter(class_1[:, 0], class_1[:, 1], c='blue', marker='s', s=100, label='Class 1', edgecolors='black')
+   ## TODO Learn the weights
+   r = 0.1 # learning rate
+   for epoch in range(10_000):
+      print("Epoch: ", epoch)
+      errors = np.zeros(len(xdata))
+      for i in range(len(xdata)):
+         t = ydata[i]
+         y = p.predict(xdata[i,:])
+         errors[i] = t - y
+         
+         # Fixed weight update: update bias and input weights separately
+         p.w[0] = p.w[0] + r * errors[i]  # bias update
+         p.w[1:] = p.w[1:] + r * errors[i] * xdata[i,:]  # input weights update
+      error_sum = np.sum(np.abs(errors))
+      if error_sum < 0.1:
+         break
+      print(" - Error: ", error_sum)
 
-# Create decision boundary line
-# The decision boundary is where w0 + w1*x1 + w2*x2 = 0
-# Solving for x2: x2 = (-w0 - w1*x1) / w2
-w0, w1, w2 = p.w[0], p.w[1], p.w[2]
+   # calculate the error and update the weights
+   print("Final weights:", p.w)
 
-# Define x1 range for the line
-x1_range = np.linspace(-0.5, 2.5, 100)
 
-if w2 != 0:  # Avoid division by zero
-      x2_boundary = (-w0 - w1 * x1_range) / w2
-      plt.plot(x1_range, x2_boundary, 'k--', linewidth=2, label='Decision Boundary')
+   ## TODO plot points and linear decision boundary
+   plt.figure(figsize=(10, 8))
 
-# Add labels and formatting
-plt.xlabel('x1', fontsize=12)
-plt.ylabel('x2', fontsize=12)
-plt.title('Perceptron Classification with Decision Boundary', fontsize=14)
-plt.legend()
-plt.grid(True, alpha=0.3)
+   # Separate data points by class
+   class_0 = xdata[ydata == 0]
+   class_1 = xdata[ydata == 1]
 
-# Set axis limits to show all points clearly
-plt.xlim(-0.5, 2.5)
-plt.ylim(-0.5, 3.5)
+   # Plot data points with different colors
+   plt.scatter(class_0[:, 0], class_0[:, 1], c='red', marker='o', s=100, label='Class 0', edgecolors='black')
+   plt.scatter(class_1[:, 0], class_1[:, 1], c='blue', marker='s', s=100, label='Class 1', edgecolors='black')
 
-plt.tight_layout()
-plt.show()
+   # Create decision boundary line
+   # The decision boundary is where w0 + w1*x1 + w2*x2 = 0
+   # Solving for x2: x2 = (-w0 - w1*x1) / w2
+   w0, w1, w2 = p.w[0], p.w[1], p.w[2]
 
-# Print equation of decision boundary
-print(f"\nDecision boundary equation: {w0:.3f} + {w1:.3f}*x1 + {w2:.3f}*x2 = 0")
-print(f"Or: x2 = {-w0/w2:.3f} + {-w1/w2:.3f}*x1")
+   # Define x1 range for the line
+   x1_range = np.linspace(-0.5, 2.5, 100)
+
+   if w2 != 0:  # Avoid division by zero
+         x2_boundary = (-w0 - w1 * x1_range) / w2
+         plt.plot(x1_range, x2_boundary, 'k--', linewidth=2, label='Decision Boundary')
+
+   # Add labels and formatting
+   plt.xlabel('x1', fontsize=12)
+   plt.ylabel('x2', fontsize=12)
+   plt.title('Perceptron Classification with Decision Boundary', fontsize=14)
+   plt.legend()
+   plt.grid(True, alpha=0.3)
+
+   # Set axis limits to show all points clearly
+   plt.xlim(-0.5, 2.5)
+   plt.ylim(-0.5, 3.5)
+
+   plt.tight_layout()
+   plt.show()
+
+   # Print equation of decision boundary
+   print(f"\nDecision boundary equation: {w0:.3f} + {w1:.3f}*x1 + {w2:.3f}*x2 = 0")
+   print(f"Or: x2 = {-w0/w2:.3f} + {-w1/w2:.3f}*x1")

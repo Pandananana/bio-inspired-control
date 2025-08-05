@@ -17,7 +17,7 @@ We have provided the function signature for you.
 
 # Helper function to compute sigmoid
 def sigmoid(x):
-   return (np.exp(2*x) - 1 ) / (np.exp(2*x) + 1 )
+   return 1 / (1 + np.exp(-x))
 
 class SignActivation(ActivationFunction):
    """ 
@@ -110,10 +110,7 @@ class Perceptron:
       """
       a = self.activation(x)
       y = self.output(a)
-      if y < 0:
-         return 0
-      else:
-         return 1
+      return y
 
    def gradient(self, a):
       """
@@ -149,7 +146,7 @@ if __name__ == '__main__':
 
 
    ## TODO Test perceptron initialization
-   p = Perceptron(2,LinearActivation)
+   p = Perceptron(2,SigmoidActivation)
    print("")
    print("Initial Weights")
    print(p.w)
@@ -158,7 +155,7 @@ if __name__ == '__main__':
    print(p.predict(xdata[0,:]))
 
    ## TODO Learn the weights
-   r = 0.001 # learning rate
+   r = 0.1 # learning rate
    for epoch in range(10_000):
       print("Epoch: ", epoch)
       errors = np.zeros(len(xdata))
@@ -171,7 +168,7 @@ if __name__ == '__main__':
          p.w[0] = p.w[0] + r * errors[i]  # bias update
          p.w[1:] = p.w[1:] + r * errors[i] * xdata[i,:]  # input weights update
       error_sum = np.sum(np.abs(errors))
-      if error_sum < 0.01:
+      if error_sum < 0.1:
          break
       print(" - Error: ", error_sum)
 
