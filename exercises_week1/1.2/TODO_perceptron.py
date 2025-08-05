@@ -3,9 +3,21 @@ from activation import ActivationFunction
 import matplotlib.pyplot as plt
 
 
+##########################################
 """
-HINT: Reuse perceptron from 1.1
+TODO:
+For each activation function: Sign, Sigmoid, Linear, define the following:
+1) Forward function
+2) Gradient function
+
+We have provided the function signature for you.
+
 """
+##########################################
+
+# Helper function to compute sigmoid
+def sigmoid(x):
+   return (np.exp(2*x) - 1 ) / (np.exp(2*x) + 1 )
 
 class SignActivation(ActivationFunction):
    """ 
@@ -16,13 +28,35 @@ class SignActivation(ActivationFunction):
          This is the output function.
          TODO: Define the correct return function, given input `x`
       """
+      if x > 0:
+         return 1
+      else:
+         return 0
       
    def gradient(self, x):
       """
             Function derivative.
             Define the correct return value (derivative), given input `x`
       """
-      return None
+      return 0
+   
+
+class SigmoidActivation(ActivationFunction):
+   def forward(self, x):
+      return sigmoid(x)
+   def gradient(self, x):
+      return sigmoid(x) * (1 - sigmoid(x))
+
+
+class LinearActivation(ActivationFunction):
+   def forward(self, x):
+      return x
+   def gradient(self, x):
+      return 1
+
+class ReLU(ActivationFunction):
+   pass
+
 
 class Perceptron:
    """ 
@@ -42,9 +76,12 @@ class Perceptron:
       if not isinstance(act_f, type) or not issubclass(act_f, ActivationFunction):
          raise TypeError('act_f has to be a subclass of ActivationFunction (not a class instance).')
       # weights
-      self.w = #np.random.normal(mean, standard deviation, size)
+      mean = 0
+      std = 1
+      size = n_inputs + 1
+      self.w = np.random.normal(mean, std, size)
       # activation function
-      self.f =
+      self.f = act_f()
 
       if self.f is not None and not isinstance(self.f, ActivationFunction):
          raise TypeError("self.f should be a class instance.")
@@ -55,7 +92,7 @@ class Perceptron:
          TODO: Fill in the function to provide the correct output
          NB: Remember the bias
       """
-      a = 
+      a = np.sum(np.dot(self.w[1:], x)) + self.w[0]
       return a
 
    def output(self, a):
@@ -63,7 +100,7 @@ class Perceptron:
          It computes the neuron output `y`, given the activation `a`
          TODO: Fill in the function to provide the correct output
       """
-      y = 
+      y = self.f.forward(a)
       return y
 
    def predict(self, x):
@@ -71,7 +108,12 @@ class Perceptron:
          It computes the neuron output `y`, given the input `x`
          TODO: Fill in the function to provide the correct output
       """
-      return None
+      a = self.activation(x)
+      y = self.output(a)
+      if y < 0:
+         return 0
+      else:
+         return 1
 
    def gradient(self, a):
       """
@@ -83,25 +125,97 @@ if __name__ == '__main__':
    data = np.array( [ [0.5, 0.5, 0], [1.0, 0, 0], [2.0, 3.0, 0], [0, 1.0, 1], [0, 2.0, 1], [1.0, 2.2, 1] ] )
    xdata = data[:,:2]
    ydata = data[:,2]
+   print(data)
    print(xdata)
    print(ydata)
    
-## TODO Test your activation function
-a = 
-print(a.forward(2))
-"print(a.forward(0))"
+   ## TODO Test your activation function
+   a = SignActivation()
+   print("Sign Activation")
+   print(a.forward(2))
+   print(a.forward(0))
 
-## TODO Test perceptron initialization
-p = 
-print(p.predict(xdata[0,:]) )
+   b = SigmoidActivation()
+   print("")
+   print("Sigmoid Activation")
+   print(b.forward(2))
+   print(b.forward(0))
 
-## TODO Learn the weights
-r = 0.1 # learning rate
-## calculate the error and update the weights
-print(p.w)
-## TODO plot points and linear decision boundary
+   c = LinearActivation()
+   print("")
+   print("Linear Activation")
+   print(c.forward(2))
+   print(c.forward(0))
 
-plt.plot(xp,yp, 'k--')
-plt.xlabel('x1')
-plt.ylabel('x2')
-plt.show()
+
+   ## TODO Test perceptron initialization
+   p = Perceptron(2,LinearActivation)
+   print("")
+   print("Initial Weights")
+   print(p.w)
+
+   print("\nPredict")
+   print(p.predict(xdata[0,:]))
+
+   ## TODO Learn the weights
+   r = 0.001 # learning rate
+   for epoch in range(10_000):
+      print("Epoch: ", epoch)
+      errors = np.zeros(len(xdata))
+      for i in range(len(xdata)):
+         t = ydata[i]
+         y = p.predict(xdata[i,:])
+         errors[i] = t - y
+         
+         # Fixed weight update: update bias and input weights separately
+         p.w[0] = p.w[0] + r * errors[i]  # bias update
+         p.w[1:] = p.w[1:] + r * errors[i] * xdata[i,:]  # input weights update
+      error_sum = np.sum(np.abs(errors))
+      if error_sum < 0.01:
+         break
+      print(" - Error: ", error_sum)
+
+   # calculate the error and update the weights
+   print("Final weights:", p.w)
+
+
+   ## TODO plot points and linear decision boundary
+   plt.figure(figsize=(10, 8))
+
+   # Separate data points by class
+   class_0 = xdata[ydata == 0]
+   class_1 = xdata[ydata == 1]
+
+   # Plot data points with different colors
+   plt.scatter(class_0[:, 0], class_0[:, 1], c='red', marker='o', s=100, label='Class 0', edgecolors='black')
+   plt.scatter(class_1[:, 0], class_1[:, 1], c='blue', marker='s', s=100, label='Class 1', edgecolors='black')
+
+   # Create decision boundary line
+   # The decision boundary is where w0 + w1*x1 + w2*x2 = 0
+   # Solving for x2: x2 = (-w0 - w1*x1) / w2
+   w0, w1, w2 = p.w[0], p.w[1], p.w[2]
+
+   # Define x1 range for the line
+   x1_range = np.linspace(-0.5, 2.5, 100)
+
+   if w2 != 0:  # Avoid division by zero
+         x2_boundary = (-w0 - w1 * x1_range) / w2
+         plt.plot(x1_range, x2_boundary, 'k--', linewidth=2, label='Decision Boundary')
+
+   # Add labels and formatting
+   plt.xlabel('x1', fontsize=12)
+   plt.ylabel('x2', fontsize=12)
+   plt.title('Perceptron Classification with Decision Boundary', fontsize=14)
+   plt.legend()
+   plt.grid(True, alpha=0.3)
+
+   # Set axis limits to show all points clearly
+   plt.xlim(-0.5, 2.5)
+   plt.ylim(-0.5, 3.5)
+
+   plt.tight_layout()
+   plt.show()
+
+   # Print equation of decision boundary
+   print(f"\nDecision boundary equation: {w0:.3f} + {w1:.3f}*x1 + {w2:.3f}*x2 = 0")
+   print(f"Or: x2 = {-w0/w2:.3f} + {-w1/w2:.3f}*x1")

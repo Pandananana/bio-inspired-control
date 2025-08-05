@@ -1,50 +1,11 @@
 import numpy as np
 
-from perceptron import Perceptron
+from TODO_perceptron import Perceptron, SigmoidActivation, LinearActivation
 from activation import ActivationFunction
 
 """
 HINT: Reuse your perceptron.py and activation.py files, and apply the functions directly.
 """
-
-
-
-class Sigmoid(ActivationFunction):
-   """ 
-      Sigmoid activation: `f(x) = 1/(1+e^(-x))`
-   """
-   def forward(self, x):
-      """
-         Activation function output.
-         TODO: Change the function to return the correct value, given input `x`.
-      """
-      return None
-
-   def gradient(self, x):
-      """
-         Activation function derivative.
-         TODO: Change the function to return the correct value, given input `x`.
-      """
-      return None
-
-
-class LinearActivation(ActivationFunction):
-   """ 
-      Linear activation: `f(x) = x`
-   """
-   def forward(self, x):
-      """
-         Activation function output.
-         TODO: Change the function to return the correct value, given input `x`.
-      """
-      return None
-
-   def gradient(self, x):
-      """
-         Activation function derivative.
-         TODO: Change the function to return the correct value, given input `x`.
-      """
-      return None
 
 
 class Layer:
@@ -54,6 +15,10 @@ class Layer:
       """
       # TODO Create the perceptrons required for the layer
       self.ps = []
+      self.num_units = num_units
+      for _ in range(num_units):
+         p = Perceptron(num_inputs, act_f)
+         self.ps.append(p)
 
    def activation(self, x):
       """ Returns the activation `a` of all perceptrons in the layer, given the input vector`x`. """
@@ -119,15 +84,17 @@ class MLP:
       self.alpha = alpha
 
       # TODO: Define a hidden layer and the output layer
-      self.l1 = None # hidden layer 1
-      self.l_out = None # output layer
+      self.l1 = Layer(num_inputs, n_hidden_units, SigmoidActivation)
+      self.l_out = Layer(n_hidden_units, n_outputs, LinearActivation)
 
    def predict(self, x):
       """ 
       Forward pass prediction given the input x
       TODO: Write the function
       """
-      return None
+      y_l1 = self.l1.predict(x)
+      y_l_out = self.l_out.predict(y_l1)
+      return y_l_out
 
    def train(self, inputs, outputs):
       """
@@ -177,16 +144,42 @@ class MLP:
 def calc_prediction_error(model, x, t):
    """ Calculate the average prediction error """
    # TODO Write the function
-   return None
+   n = len(t)
+   error = np.zeros(n)
+
+   for i in range(n):
+      y = model.predict(x[i])
+      error[i] = np.abs(y[0] - t[i])**2
+
+   return np.sum(error) / n
 
 
 if __name__ == "__main__":
 
    # TODO: Test new activation functions
+   # Re-used from previous exercise
 
    # TODO: Test Layer class init
+   x_test = np.array([[np.pi, 1]]).T
+   l = Layer(2, 5, LinearActivation)
+   print("\nLayer Test")
+   print(l.predict(x_test))
+   for p in l.ps:
+      print(p.w)
 
    # TODO: Test MLP class init
+   mlp = MLP(2, 5, 1)
+   print("\nMLP Test")
+   print(" - L1 shape: ", mlp.l1.w.shape)
+   print(" - Lout shape: ", mlp.l_out.w.shape)
+   print(" - Test predict: ", mlp.predict(x_test))
+
+   # Test calc_prediction_error
+   x_test = np.random.rand(10,2)
+   t_test = np.random.rand(10)
+   print(x_test)
+   print(t_test)
+   print(calc_prediction_error(mlp, x_test, t_test))
 
    # TODO: Training data
 
