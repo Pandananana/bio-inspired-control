@@ -4,6 +4,88 @@
 
 ### 1.1.1
 
+We updated the template to be the following:
+
+```python
+# Helper function to compute sigmoid
+def sigmoid(x):
+   return 1/(1 + np.exp(-x))
+
+class SignActivation(ActivationFunction):
+   """ 
+         Sign activation: `f(x) = 1 if x > 0, 0 if x <= 0`
+   """
+   def forward(self, x):
+      """
+         This is the output function.
+         TODO: Define the correct return function, given input `x`
+      """
+      if x > 0:
+         return 1
+      else:
+         return 0
+      
+   def gradient(self, x):
+      """
+            Function derivative.
+            Define the correct return value (derivative), given input `x`
+      """
+      return 0
+   
+
+class SigmoidActivation(ActivationFunction):
+   def forward(self, x):
+      return sigmoid(x)
+   def gradient(self, x):
+      return sigmoid(x) * (1 - sigmoid(x))
+
+
+class LinearActivation(ActivationFunction):
+   def forward(self, x):
+      return x
+   def gradient(self, x):
+      return 1
+```
+
+
+We then tested using these values
+
+```python
+a = SignActivation()
+print("Sign Activation")
+print(a.forward(2))
+print(a.forward(0))
+
+b = SigmoidActivation()
+print("")
+print("Sigmoid Activation")
+print(b.forward(2))
+print(b.forward(0))
+
+c = LinearActivation()
+print("")
+print("Linear Activation")
+print(c.forward(2))
+print(c.forward(0))
+
+```
+
+The output was this
+
+```
+Sign Activation
+1
+0
+
+Sigmoid Activation
+0.8807970779778823
+0.5
+
+Linear Activation
+2
+0
+```
+
 ### 1.1.2 
 We added for this task this code in the initialization of the perceptron: 
 ```python
@@ -64,6 +146,30 @@ Here is the code:
 ```
 
 ### 1.1.4
+
+We tested with different weights and rates, but we found a learning rate of 0.001, max epochs of 10_000, weight initialization mean of 0 and std of 1. The bias update and the input weights were updated seperately. The total error was combined and if it was below a threshold of 0.01 then the learning was stopped. With a learning rate of 0.001 we often got epochs over 1000, but every run was different.
+
+```python
+r = 0.001 # learning rate
+for epoch in range(10_000):
+   # print("Epoch: ", epoch)
+   errors = np.zeros(len(xdata))
+   for i in range(len(xdata)):
+      t = ydata[i]
+      y = p.predict(xdata[i,:])
+      errors[i] = t - y
+      
+      # Fixed weight update: update bias and input weights separately
+      p.w[0] = p.w[0] + r * errors[i]  # bias update
+      p.w[1:] = p.w[1:] + r * errors[i] * xdata[i,:]  # input weights update
+   error_sum = np.sum(np.abs(errors))
+   if error_sum < 0.01:
+      break
+   # print(" - Error: ", error_sum)
+
+# calculate the error and update the weights
+print("Final weights:", p.w)
+```
 
 ### 1.1.5
 The final weight results depend on the initial values because there are infinite ways to place the decision boundary. The result is therefore depending from where the line is starting at, which is defined in the initialization.
