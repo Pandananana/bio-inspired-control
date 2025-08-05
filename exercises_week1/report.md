@@ -95,13 +95,13 @@ std = 1
 size = n_inputs + 1
 self.w = np.random.normal(mean, std, size)
 # activation function
- self.f = act_f()
+self.f = act_f()
 ```
 
 To test this code we use this:
 ```python
 ## TODO Test perceptron initialization
-p = Perceptron(2,LinearActivation)
+p = Perceptron(2,SigmoidActivation)
 print("")
 print("Initial Weights")
 print(p.w)
@@ -114,7 +114,7 @@ Initial Weights
 ```
 ### 1.1.3
 Here is the code:
-```
+```python
    def activation(self, x):
       """
          It computes the activation `a` given an input `x`
@@ -139,48 +139,45 @@ Here is the code:
       """
       a = self.activation(x)
       y = self.output(a)
-      if y < 0:
-         return 0
-      else:
-         return 1
+      return y
 ```
 
 ### 1.1.4
 
-We tested with different weights and rates, but we found a learning rate of 0.001, max epochs of 10_000, weight initialization mean of 0 and std of 1. The bias update and the input weights were updated seperately. The total error was combined and if it was below a threshold of 0.01 then the learning was stopped. With a learning rate of 0.001 we often got epochs over 1000, but every run was different.
+We tested with different weights and rates, but we found a learning rate of 0.1, max epochs of 10_000, weight initialization mean of 0 and std of 1. The bias update and the input weights were updated seperately. The total error was combined and if it was below a threshold of 0.1 then the learning was stopped. With a learning rate of 0.1 we often got epochs over 1000, but every run was different.
 
 ```python
-r = 0.001 # learning rate
-for epoch in range(10_000):
-   # print("Epoch: ", epoch)
-   errors = np.zeros(len(xdata))
-   for i in range(len(xdata)):
-      t = ydata[i]
-      y = p.predict(xdata[i,:])
-      errors[i] = t - y
-      
-      # Fixed weight update: update bias and input weights separately
-      p.w[0] = p.w[0] + r * errors[i]  # bias update
-      p.w[1:] = p.w[1:] + r * errors[i] * xdata[i,:]  # input weights update
-   error_sum = np.sum(np.abs(errors))
-   if error_sum < 0.01:
-      break
-   # print(" - Error: ", error_sum)
+r = 0.1 # learning rate
+   for epoch in range(10_000):
+      print("Epoch: ", epoch)
+      errors = np.zeros(len(xdata))
+      for i in range(len(xdata)):
+         t = ydata[i]
+         y = p.predict(xdata[i,:])
+         errors[i] = t - y
+         
+         # Fixed weight update: update bias and input weights separately
+         p.w[0] = p.w[0] + r * errors[i]  # bias update
+         p.w[1:] = p.w[1:] + r * errors[i] * xdata[i,:]  # input weights update
+      error_sum = np.sum(np.abs(errors))
+      if error_sum < 0.1:
+         break
+      print(" - Error: ", error_sum)
 
-# calculate the error and update the weights
-print("Final weights:", p.w)
+   # calculate the error and update the weights
+   print("Final weights:", p.w)
 ```
 
 ### 1.1.5
-The final weight results depend on the initial values because there are infinite ways to place the decision boundary. The result is therefore depending from where the line is starting at, which is defined in the initialization.
+The final weights are roughly the same in each run (when using SigmoidActivation), because they are converging on an optimal decision boundary that is between the two classes. The StepActivation has larger differences between runs, because it stops learning as soon as all points are classified correctly, the points are therefore also closer to the decision boundary. The initial values have a larger say using this activation function. 
 
-The final weight values are:
+The final weight values are for the sigmoid activation function:
 ```bash
 Final weights: [ -1.22747163 -12.77125736   7.73938036]
 ```
 
 ### 1.1.6
-Here is the code for the plot:
+Here is the code for the plot (sigmoid activation function):
 ```
 plt.figure(figsize=(10, 8))
 
