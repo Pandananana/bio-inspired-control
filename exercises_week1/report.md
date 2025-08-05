@@ -176,7 +176,7 @@ The final weight results depend on the initial values because there are infinite
 
 The final weight values are:
 ```bash
-Final weights: [-0.30640327 -0.66884034  0.44420975]
+Final weights: [ -1.22747163 -12.77125736   7.73938036]
 ```
 
 ### 1.1.6
