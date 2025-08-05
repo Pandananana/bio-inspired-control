@@ -10,6 +10,7 @@ For each activation function: Sign, Sigmoid, Linear, define the following:
 1) Forward function
 2) Gradient function
 Test
+Anohter test
 We have provided the function signature for you.
 
 """
