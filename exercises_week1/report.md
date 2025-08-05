@@ -4,8 +4,32 @@
 
 ### 1.1.1
 
-### 1.1.2
+### 1.1.2 
+We added for this task this code in the initialization of the perceptron: 
+```python
+# weights
+mean = 0
+std = 1
+size = n_inputs + 1
+self.w = np.random.normal(mean, std, size)
+# activation function
+ self.f = act_f()
+```
 
+To test this code we use this:
+```python
+## TODO Test perceptron initialization
+p = Perceptron(2,LinearActivation)
+print("")
+print("Initial Weights")
+print(p.w)
+```
+
+The output of this test is:
+```bash
+Initial Weights
+[-0.52604498  0.78864828  1.59846333]
+```
 ### 1.1.3
 Here is the code:
 ```
@@ -42,6 +66,12 @@ Here is the code:
 ### 1.1.4
 
 ### 1.1.5
+The final weight results depend on the initial values because there are infinite ways to place the decision boundary. The result is therefore depending from where the line is starting at, which is defined in the initialization.
+
+The final weight values are:
+```bash
+Final weights: [-0.30640327 -0.66884034  0.44420975]
+```
 
 ### 1.1.6
 Here is the code for the plot:
