@@ -77,7 +77,7 @@ class Perceptron:
          raise TypeError('act_f has to be a subclass of ActivationFunction (not a class instance).')
       # weights
       mean = 0
-      std = 0.5
+      std = 1
       size = n_inputs + 1
       self.w = np.random.normal(mean, std, size)
       # activation function
@@ -149,7 +149,7 @@ print(c.forward(0))
 
 
 ## TODO Test perceptron initialization
-p = Perceptron(2,SigmoidActivation)
+p = Perceptron(2,LinearActivation)
 print("")
 print("Initial Weights")
 print(p.w)
@@ -158,14 +158,25 @@ print("\nPredict")
 print(p.predict(xdata[0,:]))
 
 ## TODO Learn the weights
-r = 0.1 # learning rate
-for epoch in range(10):
+r = 0.001 # learning rate
+for epoch in range(10_000):
+   print("Epoch: ", epoch)
+   errors = np.zeros(len(xdata))
    for i in range(len(xdata)):
       t = ydata[i]
       y = p.predict(xdata[i,:])
-      error = t - y
-      print("Error: ", error)
-      p.w = p.w + r * error * xdata[i,:].insert()
+      errors[i] = t - y
+      
+      # Fixed weight update: update bias and input weights separately
+      p.w[0] = p.w[0] + r * errors[i]  # bias update
+      p.w[1:] = p.w[1:] + r * errors[i] * xdata[i,:]  # input weights update
+   error_sum = np.sum(np.abs(errors))
+   if error_sum < 0.01:
+      break
+   print(" - Error: ", error_sum)
+
+# calculate the error and update the weights
+print("Final weights:", p.w)
 
 
 # ## calculate the error and update the weights
