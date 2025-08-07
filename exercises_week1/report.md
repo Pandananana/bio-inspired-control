@@ -401,3 +401,18 @@ We tested for learning rates 0.001, 0.01, 0.5 and 0.1.
 ![alt text](image-3.png)
 
 we see it converges at around 1200 epochs for lr=0.001, but already at around 200 epochs for both 0.01 and 0.1.
+
+## 1.3 Fable exercise
+\underline{For the first question}; What happens if you change the relative position of the camera and the robot after starting your code?
+
+If we were to change these positions the code wouldn't be purposeful. The robot would no longer move to the intented position. It will be missed alined with the intented training position and would therefore produce incorrect output.
+
+\underline{For the second question}; In your solution, is learning active all the time.
+
+The answer is no.
+
+\underline{For the last question}; If not, could you imagine a way to change your solution to have "active" (online) learning? Would it work?
+
+We didn't implement online learning but if we were to implement it we would keep the angles while testing/running the code. We would then retrain the model after a certain amount of time e.g. after 10 clicks. 
+
+## 1.4 Spiking Neuron Model
