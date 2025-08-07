@@ -15,21 +15,25 @@ def LIF(um_0, I, T):
     dum_dt = lambda um_t: (u_rest - um_t + Rm*I)/(Rm*Cm)
    
     # TODO Calculate the um_t from T = 0 until T in steps of delta-t
+    for i in range(1, len(um_t)):
+        um_t[i] = um_t[i-1] + dum_dt(um_t[i-1]) * delta_t
+        if um_t[i] >= u_thresh:
+            um_t[i] = u_rest  # Reset to resting potential after spike
     return um_t
 
 
 # Point 1.2
 # TODO: Calculate the membrane potential using the LIF function from Point 1.1
-# membrane_potential = LIF()
+membrane_potential = LIF(um_0=-65e-3, I=1.6e-9, T=0.1)
 
 plt.figure(figsize=(7,5))
-#plt.plot(list(range(int(0.1//1e-5))), membrane_potential)
-#plt.show()
+plt.plot(list(range(int(0.1//1e-5))), membrane_potential)
+plt.show()
 
 
 # Point 1.3
 # TODO: Define a function to calculate the interspike intervals
-#calculate_isi =
+#calculate_isi = 
 
 # TODO: Define a function to calculate the spiking frequency of a whole experiment
 #spiking_frequency =
