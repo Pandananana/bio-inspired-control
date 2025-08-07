@@ -187,6 +187,8 @@ Here is an image of the plot. We can see that the decision boundary line seperat
 
 ### 1.2.1
 
+We copied the TODO_perceptron.py and then imported the activation functions into the TODO_mlp.py, so we didn't have to copy code one more time.
+
 ### 1.2.2
 
 ### 1.2.3
