@@ -1,0 +1,11 @@
+numpy
+scipy
+matplotlib
+psutil
+pylint
+pyserial
+torch
+torchvision
+opencv-python
+-e ./additions/fable_2_api
+-e ./additions/exercise_camera_tools

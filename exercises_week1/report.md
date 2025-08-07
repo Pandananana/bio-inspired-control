@@ -184,3 +184,17 @@ Here is an image of the plot. We can see that the decision boundary line seperat
 
 
 ## 1.2
+
+### 1.2.1
+
+### 1.2.2
+
+### 1.2.3
+
+### 1.2.4
+
+### 1.2.5
+
+### 1.2.6
+
+### 1.2.7
