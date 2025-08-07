@@ -3,6 +3,7 @@ import camera_tools.camera_tools as ct
 import cv2
 import datetime
 from FableAPI.fable_init import api
+import time
 
 # We have provided camera_tools as a stand-alone python file in ~/camera_tools/camera_tools.py
 # The same functions are available in the Conda 'biocontrol' venv that is provided
@@ -76,7 +77,7 @@ class TestClass:
                 print(x, y)
                 tmeas1 = api.getPos(0,module)
                 tmeas2 = api.getPos(1,module)
-                self.data[i,:] = np.array([tmeas1, tmeas2, x, y])
+                self.data[self.i,:] = np.array([tmeas1, tmeas2, x, y])
                 self.i += 1
 
                 # set new pos
@@ -89,8 +90,10 @@ class TestClass:
         return False
 
 test = TestClass(num_datapoints)
-test.go()    
 
+while not test.go():
+    time.sleep(0.2)
+    
 # Save collected data to CSV
 np.savetxt("robot_data.csv", test.data, delimiter=",", header="theta1,theta2,x,y", comments='')
 
