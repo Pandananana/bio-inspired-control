@@ -215,7 +215,9 @@ plt.ylim(-0.5, 3.5)
 plt.tight_layout()
 plt.show()
 ```
-Here is an image of the plot:
+Here is an image of the plot. We can see that the decision boundary line seperates the 2 classes perfectly, and that the nearest points of each class are rougly equidistance from the line. This is caused by us using the Sigmoid Activation function. 
+
+
 ![alt text](image.png)
 
 ## 1.2
