@@ -40,6 +40,7 @@ def calculate_isi(um_t):
         if um_t[i] == u_rest:
             if i != 0:
                 return (i - 1) * delta_t
+    return 0
 
 
 isi = calculate_isi(membrane_potential)
@@ -49,19 +50,29 @@ print("Spiking frequency: ", 1 / isi)
 # TODO: Define a function to calculate the spiking frequency of a whole experiment
 # spiking_frequency =
 
-# membrane_potential2 = LIF(TODO)
-# plt.figure(figsize=(7,5))
-# plt.plot(list(range(int(0.1//1e-5))), membrane_potential2)
-# plt.show()
+#membrane_potential2 = LIF(TODO)
+#plt.figure(figsize=(7,5))
+#plt.plot(list(range(int(0.1//1e-5))), membrane_potential2)
+#plt.show()
 
 
 # Point 1.4
-# plt.figure(figsize=(7, 5))
-# spikes = []
-# # TODO write the code to accumulate the spikes
-# # for current in ...: #Solution here
+plt.figure(figsize=(7, 5))
+spikes = []
+# TODO write the code to accumulate the spikes
+# for current in ...: #Solution here
 
-# plt.plot(list(np.arange(0, 5.5e-9, 0.5e-9)), spikes)
-# plt.xlabel("Constant current")
-# plt.ylabel("Spiking frequency")
-# plt.show()
+f = []
+for i in np.arange(0, 5.5e-9, 0.5e-9):
+    membrane_potential = LIF(um_0=-65e-3, I=i, T=0.1)
+    isi = calculate_isi(membrane_potential)
+    if isi != 0:
+        f.append(1/isi) 
+    else: 
+        f.append(0)
+    
+
+plt.plot(list(np.arange(0, 5.5e-9, 0.5e-9)), f)
+plt.xlabel("Constant current")
+plt.ylabel("Spiking frequency")
+plt.show()
