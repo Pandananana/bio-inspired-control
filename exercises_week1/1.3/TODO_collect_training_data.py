@@ -91,9 +91,10 @@ class TestClass:
 test = TestClass(num_datapoints)
 test.go()    
 
+# Save collected data to CSV
+np.savetxt("robot_data.csv", test.data, delimiter=",", header="theta1,theta2,x,y", comments='')
 
 print('Terminating')
 api.terminate()
 
 # TODO SAVE .csv file with robot pos data and target location x,y
-
