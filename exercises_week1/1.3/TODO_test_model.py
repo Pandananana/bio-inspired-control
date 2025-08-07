@@ -9,6 +9,7 @@ cam = ct.prepare_camera()
 print(cam.isOpened())  # False
 i = 0
 
+
 # Initialize the camera first.. waits for it to detect the green block
 def initialize_camera(cam):
     while True:
@@ -18,20 +19,22 @@ def initialize_camera(cam):
         if x is not None:
             break
 
+
 # Initialize the robot module
 def initialize_robot(module=None):
     api.setup(blocking=True)
     # Find all the robots and return their IDs.
-    print('Search for modules')
+    print("Search for modules")
     moduleids = api.discoverModules()
 
     if module is None:
         module = moduleids[0]
-    print('Found modules: ',moduleids)
-    api.setPos(0,0, module)
+    print("Found modules: ", moduleids)
+    api.setPos(0, 0, module)
     api.sleep(0.5)
 
     return module
+
 
 initialize_camera(cam)
 module = initialize_robot()
@@ -42,13 +45,14 @@ speedY = 25
 api.setSpeed(speedX, speedY, module)
 
 # Set accuracy
-accurateX = 'HIGH'
-accurateY = 'HIGH'
+accurateX = "HIGH"
+accurateY = "HIGH"
 api.setAccurate(accurateX, accurateY, module)
 
 # TODO Load the trained model
 model = torch_model.MLPNet(2, 16, 2)
-#model.load_state_dict(torch.load('model_file_path'))
+model.load_state_dict(torch.load("trained_model.pth"))
+
 
 # dummy class for targets
 class CoordinateStore:
@@ -56,11 +60,11 @@ class CoordinateStore:
         self.point = None
         self.new = False
 
-    def select_point(self,event,x,y,flags,param):
-            if event == cv2.EVENT_LBUTTONDBLCLK:
-                cv2.circle(frame,(x,y),3,(255,0,0),-1)
-                self.point = [x,y]
-                self.new = True
+    def select_point(self, event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONDBLCLK:
+            cv2.circle(frame, (x, y), 3, (255, 0, 0), -1)
+            self.point = [x, y]
+            self.new = True
 
 
 # Instantiate class
@@ -69,7 +73,7 @@ coordinateStore1 = CoordinateStore()
 # as alternative you can set prior targets
 
 cv2.namedWindow("test")
-cv2.setMouseCallback('test', coordinateStore1.select_point)
+cv2.setMouseCallback("test", coordinateStore1.select_point)
 
 while True:
 
@@ -93,6 +97,5 @@ while True:
         api.setPos(t[0], t[1], module)
         coordinateStore1.new = False
 
-print('Terminating')
+print("Terminating")
 api.terminate()
-

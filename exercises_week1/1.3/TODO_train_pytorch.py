@@ -72,10 +72,15 @@ for t in tqdm(range(num_epochs)):
     # print(l.numpy())
     l_vec[t] = l.numpy()
 
-    # TODO Test the network
-    prediction = model(x_test)
-    loss = loss_func(prediction, y_test)
-    print(f"Test loss: {loss.item()}")
+# TODO Test the network
+prediction = model(x_test)
+with torch.no_grad():
+    error = torch.abs(prediction - y_test)
+    mean_error = error.mean(dim=0)  # mean over all samples, per angle
+    print(f"Average absolute error in angle 1: {mean_error[0].item():.4f}")
+    print(f"Average absolute error in angle 2: {mean_error[1].item():.4f}")
+    print(f"Average absolute error (all angles): {mean_error.mean().item():.4f}")
+
 
 plt.plot(l_vec)
 plt.yscale("log")
