@@ -7,7 +7,8 @@ import torch_model
 from tqdm import tqdm # progress bar
 
 # Load data
-data = pickle.load( open( "training_data.p", "rb" ) )
+#data = pickle.load( open( "training_data.p", "rb" ) )
+data = np.loadtxt("robot_data.csv", delimiter=",", skiprows=1)
 
 print(data.shape)
 angles = data[:,:2].T
@@ -22,7 +23,13 @@ if torch.cuda.is_available():
 
 x = torch.from_numpy(end_pos.T).float()
 y = torch.from_numpy(angles.T).float()
+
 # TODO split the training set and test set
+x_train = x[:int(0.8 * len(x))]
+y_train = y[:int(0.8 * len(y))]
+x_test = x[int(0.8 * len(x)):]
+y_test = y[int(0.8 * len(y)):]
+
 # Eventually normalize the data
 
 if device == 'cuda':
@@ -38,15 +45,15 @@ loss_func = torch.nn.MSELoss()
 num_epochs = 500000
 
 #h = 16
-#g = 0.999
+g = 0.999
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=100, gamma=g)
 
 l_vec = np.zeros(num_epochs)
 
 for t in tqdm(range(num_epochs)):
     # TODO Train network
-    prediction = model(x) # Forward pass prediction. Saves intermediary values required for backwards pass
-    loss = loss_func(prediction, y) # Computes the loss for each example, using the loss function defined above
+    prediction = model(x_train) # Forward pass prediction. Saves intermediary values required for backwards pass
+    loss = loss_func(prediction, y_train) # Computes the loss for each example, using the loss function defined above
     optimizer.zero_grad() # Clears gradients from previous iteration
     loss.backward() # Backpropagation of errors through the network
     optimizer.step() # Updating weights
@@ -58,7 +65,8 @@ for t in tqdm(range(num_epochs)):
     #print(l.numpy())
     l_vec[t] = l.numpy()
 
-    # TODO Test the network
+# TODO Test the network
+
 
 plt.plot(l_vec)
 plt.yscale('log')
