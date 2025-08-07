@@ -314,7 +314,7 @@ MSE: 1.5858207137898916
 ### 1.2.6
 We implemented the training loop in the following way:
 
-`````
+```python
    def train(self, inputs, outputs):
       """
          Train the network
@@ -358,41 +358,46 @@ We implemented the training loop in the following way:
       # Update weights
       self.l1.update_weights(-self.alpha * dw1 / n)
       self.l_out.update_weights(-self.alpha * dw3 / n)
+```
 
-   This performs the forward pass, saving intermediate steps. Calculates the weight change, and calculates the error, updating weights in the end.
+This performs the forward pass, saving intermediate steps. Calculates the weight change, and calculates the error, updating weights in the end.
+
 
 ### 1.2.7
-we trained the network using the following code, utilizing 4 examples and 2 hidden units. 
-   # XOR input and target data
-   X = np.array([
-      [0, 0],
-      [0, 1],
-      [1, 0],
-      [1, 1]
-   ])
+We trained the network using the following code, utilizing 4 examples and 2 hidden units. 
+   
+```python
+# XOR input and target data
+X = np.array([
+   [0, 0],
+   [0, 1],
+   [1, 0],
+   [1, 1]
+])
 
-   T = np.array([0, 1, 1, 0])
+T = np.array([0, 1, 1, 0])
 
-   # Initialize MLP with 2 hidden units and 1 output
-   mlp = MLP(num_inputs=2, n_hidden_units=2, n_outputs=1, alpha=0.5)
+# Initialize MLP with 2 hidden units and 1 output
+mlp = MLP(num_inputs=2, n_hidden_units=2, n_outputs=1, alpha=0.5)
 
-   # Training loop
-   epochs = 2000
-   mse_list = []
+# Training loop
+epochs = 2000
+mse_list = []
 
-   for epoch in range(epochs):
-      mlp.train(X, T)
-      err = calc_prediction_error(mlp, X, T)
-      mse_list.append(err)
+for epoch in range(epochs):
+   mlp.train(X, T)
+   err = calc_prediction_error(mlp, X, T)
+   mse_list.append(err)
 
-      if epoch % 200 == 0 or epoch == epochs - 1:
-         print(f"Epoch {epoch}: MSE = {err:.6f}")
+   if epoch % 200 == 0 or epoch == epochs - 1:
+      print(f"Epoch {epoch}: MSE = {err:.6f}")
 
-   # Final predictions after training
-   print("\nFinal predictions after training:")
-   for x, t in zip(X, T):
-      y = mlp.predict(x)
-      print(f"Input: {x}, Target: {t}, Prediction: {y[0]:.4f}")
+# Final predictions after training
+print("\nFinal predictions after training:")
+for x, t in zip(X, T):
+   y = mlp.predict(x)
+   print(f"Input: {x}, Target: {t}, Prediction: {y[0]:.4f}")
+```
 
 
 We tested for learning rates 0.001, 0.01, 0.5 and 0.1. 
@@ -400,28 +405,27 @@ We tested for learning rates 0.001, 0.01, 0.5 and 0.1.
 ![alt text](image-2.png)
 ![alt text](image-3.png)
 
-we see it converges at around 1200 epochs for lr=0.001, but already at around 200 epochs for both 0.01 and 0.1.
+We see it converges at around 1200 epochs for lr=0.001, but already at around 200 epochs for both 0.01 and 0.1.
 
 ## 1.3 Fable exercise
-\underline{For the first question}; What happens if you change the relative position of the camera and the robot after starting your code?
+<u>For the first question</u>; What happens if you change the relative position of the camera and the robot after starting your code?
 
 If we were to change these positions the code wouldn't be purposeful. The robot would no longer move to the intented position. It will be missed alined with the intented training position and would therefore produce incorrect output.
 
-\underline{For the second question}; In your solution, is learning active all the time.
+<u>For the second question</u>; In your solution, is learning active all the time.
 
 The answer is no.
 
-\underline{For the last question}; If not, could you imagine a way to change your solution to have "active" (online) learning? Would it work?
+<u>For the last question</u>; If not, could you imagine a way to change your solution to have "active" (online) learning? Would it work?
 
 We didn't implement online learning but if we were to implement it we would keep the angles while testing/running the code. We would then retrain the model after a certain amount of time e.g. after 10 clicks. 
 
 ## 1.4 Spiking Neuron Model
 Here is the code:
-´´´python
+```python
 u_thresh = -50 * 1e-3  # milli Volt
 u_rest = -65 * 1e-3  # milli Volt
 delta_t = 1e-5
-
 
 # Point 1.1
 def LIF(um_0, I, T):
@@ -493,5 +497,7 @@ plt.plot(list(np.arange(0, 5.5e-9, 0.5e-9)), f)
 plt.xlabel("Constant current")
 plt.ylabel("Spiking frequency")
 plt.show()
-´´´
+````
+Here is the plot:
+
 ![alt text](image-4.png)
