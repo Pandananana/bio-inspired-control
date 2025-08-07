@@ -183,7 +183,7 @@ Here is an image of the plot. We can see that the decision boundary line seperat
 ![alt text](image.png)
 
 
-## 1.2
+## 1.2 - Multi-Layer Perceptron 
 
 ### 1.2.1
 
@@ -191,12 +191,213 @@ We copied the TODO_perceptron.py and then imported the activation functions into
 
 ### 1.2.2
 
+This is the code
+
+```python
+class Layer:
+   def __init__(self, num_inputs, num_units, act_f):
+      """ 
+         Initialize the layer, creating `num_units` perceptrons with `num_inputs` each. 
+      """
+      # TODO Create the perceptrons required for the layer
+      self.ps = []
+      self.num_units = num_units
+      for _ in range(num_units):
+         p = Perceptron(num_inputs, act_f)
+         self.ps.append(p)
+
+# TODO: Test Layer class init
+x_test = np.array([[np.pi, 1]]).T
+l = Layer(2, 5, LinearActivation)
+print("\nLayer Test")
+print(l.predict(x_test))
+for p in l.ps:
+   print(p.w)
+```
+
+The outcome was the following. It worked.
+
+```bash
+Layer Test
+[ 6.56900882  7.31165826  7.71215255  0.33625482 -8.18980561]
+[0.85248635 1.50955608 0.97411219]
+[1.02770851 1.96748619 0.10290959]
+[0.39165211 2.05807135 0.85487861]
+[-1.40966651  0.44780008  0.33911588]
+[-0.91159918 -2.13877061 -0.55906039]
+```
+
 ### 1.2.3
+The output layer will have 3 inputs.
+
 
 ### 1.2.4
+In the class MLP, we implemented the function predict like this:
+```python
+   def predict(self, x):
+      """ 
+      Forward pass prediction given the input x
+      TODO: Write the function
+      """
+      y_l1 = self.l1.predict(x)
+      y_l_out = self.l_out.predict(y_l1)
+      return y_l_out
+```
+
+To test it we let this getting printed in the terminal:
+```python
+   # TODO: Test MLP class init
+   mlp = MLP(2, 5, 1)
+   print("\nMLP Test")
+   print(" - L1 shape: ", mlp.l1.w.shape)
+   print(" - Lout shape: ", mlp.l_out.w.shape)
+   print(" - Test predict: ", mlp.predict(x_test))
+```
+
+The output is:
+```
+MLP Test
+ - L1 shape:  (3, 5)
+ - Lout shape:  (6, 1)
+ - Test predict:  [2.93695411]
+```
+So the hidden layer has 3 inputs (2 data inputs and 1 bias) and 5 units. The output layer then has 5 in
+and one output, which is the overall predict.
 
 ### 1.2.5
 
+The code is here
+
+```python
+def calc_prediction_error(model, x, t):
+   """ Calculate the average prediction error """
+   # TODO Write the function
+   n = len(t)
+   error = np.zeros(n)
+
+   for i in range(n):
+      y = model.predict(x[i])
+      error[i] = np.abs(y[0] - t[i])**2
+
+   return np.sum(error) / n
+   
+# Test calc_prediction_error
+x_test = np.random.rand(10,2)
+t_test = np.random.rand(10)
+print(x_test)
+print(t_test)
+print(calc_prediction_error(mlp, x_test, t_test))
+```
+
+This is the outcome
+
+```bash
+x_test: 
+[[0.71915088 0.10388935]
+ [0.06641103 0.57469974]
+ [0.12172227 0.03804077]
+ [0.26212305 0.39714192]
+ [0.48837771 0.31950406]
+ [0.05101796 0.28989955]
+ [0.38618352 0.87166654]
+ [0.66083862 0.6422711 ]
+ [0.271169   0.15029427]
+ [0.12607583 0.71767084]]
+ 
+[0.95056408 0.88838198 0.16659071 0.55860474 0.24495209 0.81492149
+ 0.41569337 0.10078243 0.00596202 0.39430957]
+ 
+MSE: 1.5858207137898916
+```
+
+
 ### 1.2.6
+We implemented the training loop in the following way:
+
+`````
+   def train(self, inputs, outputs):
+      """
+         Train the network
+
+      Parameters
+      ----------
+      `x` : numpy array
+         Inputs (size: n_examples, n_inputs)
+      `t` : numpy array
+         Targets (size: n_examples, n_outputs)
+
+      """
+      n = len(inputs)
+
+      # Initialize accumulators
+      dw1 = np.zeros_like(self.l1.w)
+      dw3 = np.zeros_like(self.l_out.w)
+      # Loop over training examples
+      
+      for i in range(n):
+         x = inputs[i]
+         t = outputs[i]
+
+         # Forward pass
+         a1 = self.l1.activation(x)
+         o1 = self.l1.output(a1)
+         a3 = self.l_out.activation(o1)
+         y = self.l_out.output(a3)
+
+         # Backpropagation
+         delta_out = self.l_out.gradient(a3) * (y - t)
+         delta1 = self.l1.gradient(a1) * np.dot(self.l_out.w[1:], delta_out)
+
+         # Add weight change contributions to temporary array
+         o0 = np.insert(x, 0, 1)
+         o1 = np.insert(o1, 0, 1)
+
+         dw1 += delta1.reshape(-1,1).dot(o0.reshape(1,-1)).T
+         dw3 += delta_out.reshape(-1,1).dot(o1.reshape(1,-1)).T
+
+      # Update weights
+      self.l1.update_weights(-self.alpha * dw1 / n)
+      self.l_out.update_weights(-self.alpha * dw3 / n)
+
+   This performs the forward pass, saving intermediate steps. Calculates the weight change, and calculates the error, updating weights in the end.
 
 ### 1.2.7
+we trained the network using the following code, utilizing 4 examples and 2 hidden units. 
+   # XOR input and target data
+   X = np.array([
+      [0, 0],
+      [0, 1],
+      [1, 0],
+      [1, 1]
+   ])
+
+   T = np.array([0, 1, 1, 0])
+
+   # Initialize MLP with 2 hidden units and 1 output
+   mlp = MLP(num_inputs=2, n_hidden_units=2, n_outputs=1, alpha=0.5)
+
+   # Training loop
+   epochs = 2000
+   mse_list = []
+
+   for epoch in range(epochs):
+      mlp.train(X, T)
+      err = calc_prediction_error(mlp, X, T)
+      mse_list.append(err)
+
+      if epoch % 200 == 0 or epoch == epochs - 1:
+         print(f"Epoch {epoch}: MSE = {err:.6f}")
+
+   # Final predictions after training
+   print("\nFinal predictions after training:")
+   for x, t in zip(X, T):
+      y = mlp.predict(x)
+      print(f"Input: {x}, Target: {t}, Prediction: {y[0]:.4f}")
+
+
+We tested for learning rates 0.001, 0.01, 0.5 and 0.1. 
+![alt text](image-1.png)
+![alt text](image-2.png)
+![alt text](image-3.png)
+
+we see it converges at around 1200 epochs for lr=0.001, but already at around 200 epochs for both 0.01 and 0.1.

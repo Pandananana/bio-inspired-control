@@ -210,7 +210,7 @@ if __name__ == "__main__":
    T = np.array([0, 1, 1, 0])
 
    # Initialize MLP with 2 hidden units and 1 output
-   mlp = MLP(num_inputs=2, n_hidden_units=2, n_outputs=1, alpha=0.1)
+   mlp = MLP(num_inputs=2, n_hidden_units=2, n_outputs=1, alpha=0.5)
 
    # Training loop
    epochs = 2000
@@ -236,7 +236,7 @@ if __name__ == "__main__":
    plt.xlabel("Epoch")
    plt.ylabel("Mean Squared Error (MSE)")
    plt.yscale("log")
-   plt.title("XOR Training Error over Epochs")
+   plt.title("XOR Training Error over Epochs α=0.1")
    plt.grid(True, alpha=0.3)
    plt.tight_layout()
    plt.show()
