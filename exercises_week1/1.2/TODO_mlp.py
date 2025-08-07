@@ -2,6 +2,7 @@ import numpy as np
 
 from TODO_perceptron import Perceptron, SigmoidActivation, LinearActivation
 from activation import ActivationFunction
+import matplotlib.pyplot as plt
 
 """
 HINT: Reuse your perceptron.py and activation.py files, and apply the functions directly.
@@ -109,25 +110,37 @@ class MLP:
 
       TODO: Write the function to iterate through training examples and apply gradient descent to update the neuron weights
       """
+      n = len(inputs)
 
+      # Initialize accumulators
+      dw1 = np.zeros_like(self.l1.w)
+      dw3 = np.zeros_like(self.l_out.w)
       # Loop over training examples
+      for i in range(n):
+         x = inputs[i]
+         t = outputs[i]
 
          # Forward pass
-
+         a1 = self.l1.activation(x)
+         o1 = self.l1.output(a1)
+         a3 = self.l_out.activation(o1)
+         y = self.l_out.output(a3)
 
          # Backpropagation
-
+         delta_out = self.l_out.gradient(a3) * (y - t)
+         delta1 = self.l1.gradient(a1) * np.dot(self.l_out.w[1:], delta_out)
 
          # Add weight change contributions to temporary array
-      o0 = np.insert(inp, 0, 1)
-      o1 = np.insert(o1, 0, 1)
+         o0 = np.insert(x, 0, 1)
+         o1 = np.insert(o1, 0, 1)
 
-      dw1 += delta1.reshape(-1,1).dot(o0.reshape(1,-1))
-      dw3 += delta_out.reshape(-1,1).dot(o1.reshape(1,-1))
-         
-         # Update weights
+         dw1 += delta1.reshape(-1,1).dot(o0.reshape(1,-1)).T
+         dw3 += delta_out.reshape(-1,1).dot(o1.reshape(1,-1)).T
+
+      # Update weights
+      self.l1.update_weights(-self.alpha * dw1 / n)
+      self.l_out.update_weights(-self.alpha * dw3 / n)
       
-      return None # remove this line
 
    def export_weights(self):
       return [self.l1.w, self.l2.w]
@@ -186,4 +199,45 @@ if __name__ == "__main__":
    # TODO: Initialization
 
    # TODO: Write a for loop to train the network for a number of iterations. Make plots.
+   # XOR input and target data
+   X = np.array([
+      [0, 0],
+      [0, 1],
+      [1, 0],
+      [1, 1]
+   ])
+
+   T = np.array([0, 1, 1, 0])
+
+   # Initialize MLP with 2 hidden units and 1 output
+   mlp = MLP(num_inputs=2, n_hidden_units=2, n_outputs=1, alpha=0.1)
+
+   # Training loop
+   epochs = 2000
+   mse_list = []
+
+   for epoch in range(epochs):
+      mlp.train(X, T)
+      err = calc_prediction_error(mlp, X, T)
+      mse_list.append(err)
+
+      if epoch % 200 == 0 or epoch == epochs - 1:
+         print(f"Epoch {epoch}: MSE = {err:.6f}")
+
+   # Final predictions after training
+   print("\nFinal predictions after training:")
+   for x, t in zip(X, T):
+      y = mlp.predict(x)
+      print(f"Input: {x}, Target: {t}, Prediction: {y[0]:.4f}")
+
+   # Plot the MSE over epochs
+   plt.figure(figsize=(8, 5))
+   plt.plot(mse_list)
+   plt.xlabel("Epoch")
+   plt.ylabel("Mean Squared Error (MSE)")
+   plt.yscale("log")
+   plt.title("XOR Training Error over Epochs")
+   plt.grid(True, alpha=0.3)
+   plt.tight_layout()
+   plt.show()
    pass
