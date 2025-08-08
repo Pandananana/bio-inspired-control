@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 def prepare_camera():
-    return cv2.VideoCapture(0)
+    return cv2.VideoCapture("http://172.20.10.11:4747/video")
 
 def capture_image(cam):
     ret, frame = cam.read()

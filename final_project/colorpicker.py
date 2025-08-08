@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 
 
 def show_droidcam_feed(url: str):
@@ -18,6 +17,8 @@ def show_droidcam_feed(url: str):
 
     print("Connected! Press 'q' to quit")
 
+    setup_trackbars("LAB")
+
     while True:
         # Read frame
         ret, frame = cap.read()
@@ -32,10 +33,13 @@ def show_droidcam_feed(url: str):
         # Original shape (1280, 720, 3)
         # Resize the frame to fit the window
         frame = cv2.resize(frame, (360, 640))
-        locate(frame)        
-    
+
+        frame_to_thresh = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB) # LAB
+        v1_min, v2_min, v3_min, v1_max, v2_max, v3_max = get_trackbar_values("LAB")
+        thresh = cv2.inRange(frame_to_thresh, (v1_min, v2_min, v3_min), (v1_max, v2_max, v3_max))
+
         # Display the frame
-        cv2.imshow("Droidcam Feed", frame)
+        cv2.imshow("Droidcam Feed", thresh)
 
         # Break loop on 'q' press
         if cv2.waitKey(1) == ord("q"):
@@ -46,30 +50,25 @@ def show_droidcam_feed(url: str):
     cv2.destroyAllWindows()
     print("Disconnected")
 
-def locate(img):
-    frame_to_thresh = cv2.cvtColor(img, cv2.COLOR_BGR2LAB) # LAB
-    thresh = cv2.inRange(frame_to_thresh, (152, 130, 91), (255, 170, 121))
+def callback(value):
+    pass
 
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+def setup_trackbars(range_filter):
+    cv2.namedWindow("Trackbars", 0)
 
-    if len(contours) != 0:
-        # Find the largest contour
-        c = max(contours, key=cv2.contourArea)
+    for i in ["MIN", "MAX"]:
+        v = 0 if i == "MIN" else 255
+        for j in range_filter:
+            cv2.createTrackbar("%s_%s" % (j, i), "Trackbars", v, 255, callback)
 
-        # Get the minimum enclosing circle
-        (x, y), radius = cv2.minEnclosingCircle(c)
-        center = (int(x), int(y))
-        radius = int(radius)
+def get_trackbar_values(range_filter):
+    values = []
+    for i in ["MIN", "MAX"]:
+        for j in range_filter:
+            v = cv2.getTrackbarPos("%s_%s" % (j, i), "Trackbars")
+            values.append(v)
 
-        # Draw the circle and center
-        cv2.circle(img, center, radius, (0, 0, 255), 2)
-        cv2.circle(img, center, 5, (0, 255, 0), -1)
-    else:
-        x = None
-        y = None
-
-    return x, y
+    return values
 
 if __name__ == "__main__":
     show_droidcam_feed("http://172.20.10.11:4747/video")
-
