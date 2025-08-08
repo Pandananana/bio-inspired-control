@@ -5,6 +5,7 @@ import cv2
 import camera_tools as ct
 from FableAPI.fable_init import api
 from cam import locate
+from collect_testdata import rotate_and_resize
 
 cam = ct.prepare_camera()
 print(cam.isOpened())  # False
@@ -59,16 +60,19 @@ while True:
 
     frame = ct.capture_image(cam)
 
+    frame = rotate_and_resize(frame)
+
     x, y, r = locate(frame)
 
     cv2.imshow("test", frame)
 
     with torch.no_grad():
-        inp = torch.tensor([x, y, r]).float()
+        inp = torch.tensor([[x, y, r]]).float()
         outp = model(inp)
         t = outp.numpy()[0]
         print(t)
-        api.setPos(t[0], t[1], module)
+        
+    api.setPos(t[0], t[1], module)
 
     # Break loop on 'q' press
     if cv2.waitKey(1) == ord("q"):
