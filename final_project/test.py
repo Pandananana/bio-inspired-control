@@ -5,7 +5,14 @@ import cv2
 import camera_tools as ct
 from FableAPI.fable_init import api
 from cam import locate
-from collect_testdata import rotate_and_resize
+
+def rotate_and_resize(frame):
+    """Rotate the frame and resize it to fit the window."""
+    # Rotate the frame
+    frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+
+    # Resize the frame to fit the window
+    return cv2.resize(frame, (360, 640))
 
 cam = ct.prepare_camera()
 print(cam.isOpened())  # False
@@ -70,7 +77,6 @@ while True:
         inp = torch.tensor([[x, y, r]]).float()
         outp = model(inp)
         t = outp.numpy()[0]
-        print(t)
         
     api.setPos(t[0], t[1], module)
 
