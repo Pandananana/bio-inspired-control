@@ -26,14 +26,14 @@ def show_droidcam_feed(url: str):
             print("Can't receive frame")
             break
 
-        #rotate the frame
+        # rotate the frame
         frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
 
         # Original shape (1280, 720, 3)
         # Resize the frame to fit the window
         frame = cv2.resize(frame, (360, 640))
-        locate(frame)        
-    
+        locate(frame)
+
         # Display the frame
         cv2.imshow("Droidcam Feed", frame)
 
@@ -46,8 +46,9 @@ def show_droidcam_feed(url: str):
     cv2.destroyAllWindows()
     print("Disconnected")
 
+
 def locate(img):
-    frame_to_thresh = cv2.cvtColor(img, cv2.COLOR_BGR2LAB) # LAB
+    frame_to_thresh = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)  # LAB
     thresh = cv2.inRange(frame_to_thresh, (152, 130, 91), (255, 170, 121))
 
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -67,9 +68,10 @@ def locate(img):
     else:
         x = None
         y = None
+        radius = None
 
-    return x, y
+    return x, y, radius
+
 
 if __name__ == "__main__":
     show_droidcam_feed("http://172.20.10.11:4747/video")
-
