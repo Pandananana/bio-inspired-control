@@ -26,6 +26,8 @@ m1=3
 m2=3
 # Gravity
 g=-9.8
+#noise
+noise_coeff = 0
 
 ## Functions
 Var = [T,dt,L,kp,kd,le1,le2,m1,m2,g]
@@ -69,7 +71,7 @@ curr_target=0
 start_t=0
 
 # TODO define time steps of delay
-
+delay = 0.005
 
 ## Simulation - plot setup 
 
@@ -107,15 +109,26 @@ for t in np.arange(0,int(L),dt):
         ## Inverse dynamics
         ## TODO Define delayed angles and velocities
         ## TODO Compute torque with delayed angles and velocities
+        if t - delay < 0:
+            delayed_vel = [0, 0]
+            delayed_ang = ang[:]
+        else:
+            delayed_vel = vel_rec[round((t-delay)/dt)+1, :]
+            delayed_ang = ang_rec[round((t-delay)/dt)+1, :]
 
         # Get desired torque from PD controller
-        desired_torque=Sim.pdcontroller(desired_ang, ang, vel)
+        desired_torque=Sim.pdcontroller(desired_ang, delayed_ang, delayed_vel) 
             
         ## Forward dynamics
         ## TODO DEFINE NOISE - you can use randn
         ## TODO ADD NOISE to torque
+
         # Pass torque to plant
-        ang,vel,acc= Sim.plant(ang,vel,acc,desired_torque)
+        noise = np.random.randn(*desired_torque.shape) * noise_coeff * np.abs(desired_torque)
+        desired_torque_noisy = desired_torque + noise
+
+        #ang,vel,acc= Sim.plant(ang,vel,acc,desired_torque)
+        ang, vel, acc = Sim.plant(ang, vel, acc, desired_torque_noisy)
 
         ## Forward kinematics
         # Calculate new joint positions

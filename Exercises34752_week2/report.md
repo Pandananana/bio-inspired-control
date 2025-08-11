@@ -1,0 +1,161 @@
+# Week 2 Exercises
+
+## 2.1 - Feedback controller with plant delay
+
+### 2.1.1
+
+This is the code
+
+```python
+delay = [0,1,2,3]
+
+Python
+## Simulation
+for t in range(simlen-1):
+    for d in delay:
+        # Compute output
+        # TODO include the time delay
+
+        if t - d < 0:
+            u = K[1] * (target - y[0, d])
+        else:
+            u = K[1] * (target - y[t - d, d])
+        y[t+1, d]=0.5*y[t,d] + 0.4*u # 1st order dynamics
+
+## Plot
+time = range(simlen)
+for d in delay:
+    plt.plot(time, y[:, d], label=f'delay {d}')
+plt.xlabel('time step')
+plt.ylabel('y')
+plt.show()
+```
+
+The feedback control performs worse the greater the delay gets. The over
+hoot is bigger and the settling time is longer.
+
+![alt text](Figure_2_1_1.png)
+
+### 2.1.2
+
+This test was done using a delay of 1 and varying K's (0.25, 0.5, 1.5, 3). When using 3, the system is unstable. 0.25 and 0.5 have no oscillations at all, but the speed of convergence is faster for 0.5. 1.5 has more oscillations but is not as unstable as 3.
+
+![alt text](Figure_2_1_2.png)
+
+## 2.2 - Target reaching with delay
+
+### 2.2.1
+We compute noise, and add it to the desired torque that we apply to the plant. This is achieved with the following code:
+
+```python
+#noise
+noise_coeff = 0.1
+noise = np.random.randn(*desired_torque.shape) * noise_coeff * np.abs(desired_torque)
+desired_torque_noisy = desired_torque + noise
+ang, vel, acc = Sim.plant(ang, vel, acc, desired_torque_noisy)
+```
+
+We varied the noise coefficient to see the impact. 
+This is the path with 0.0 noise coefficient:
+![alt text](image.png)
+
+This is the path with 0.1 noise coefficient:
+![alt text](image-1.png)
+
+This is the path with 0.5 noise coefficient:
+![alt text](<image-2.png)
+
+This is thh path with 1.0 noise coefficient:
+![alt text](image-3.png)
+
+
+As we can see, the positions are reached with the noise coefficients of 0.0 and 0.1, however for greater noise such as the two latter values, the path becomes more erratic, and the goals aren't reached for all 4 positions. When inspecting the velocity/acceleration/jerk curves for the paths with larger noise, it can also be seen that it doesn't stabilize nearly as quickly. These plots are omitted for brevity. 
+
+### 2.2.2
+
+The bigger the delay, the bigger the oscillations become, and when the delay is bigger than 15ms the system is unstable. A delay of 5ms was reasonable as seen in the plot.
+![alt text](Figure_2_2_2.png)
+ 
+## 2.2.3
+The system can cope when the proportional (gain) parameter is lowered and the derivative (damping) parameter is raised. When keeping the delay and proportional parameter stable then the derivative parameter is very sensitive when lowered. And when keeping the derivative parameter stable and then raising the gain the proportional parameter is not as unstable as the derivative parameter was.
+
+Normal plot (kp = 200 and kd = 11.0)
+![alt text](image-5.png)
+
+kp = 300 (kd = 11.0)
+![alt text](image-6.png)
+
+kp = 100 (kd = 11.0)
+![alt text](image-7.png)
+
+kd = 2.0 (kp = 200)
+![alt text](image-8.png)
+
+kd = 20.0 (kp = 200)
+![alt text](image-9.png)
+
+## 2.3 - Feedback and feedforward control
+
+### 2.3.1
+The following plots show the effects of different delays. The system overshoots and takes longer to stabilize when the delay increases and only feedback control is enabled.
+
+**0.025:**
+![alt text](Figure_2_3_1_1.png)
+
+**0.07:**
+![alt text](image-4.png)
+
+**0.1:**
+![alt text](Figure_2_3_1.png)
+
+### 2.3.2
+
+When faced with a disturbance and the forward model turned off, the error increases while the disturbance is enabled, and it stabilizes 0.3s after the disturbance ends.
+
+![alt text](Figure_2_3_2.png)
+
+### 2.3.3
+
+Because the system just consists of the forward part, so the delay does not affect the system.
+
+![alt text](Figure_2_3_3.png)
+
+### 2.3.4
+
+Here the model doesn't recognize the disturbance, so it doesn't settle back the target angle.
+
+![alt text](Figure_2_3_4.png)
+
+## 2.4 - Smith predictor with learned model
+
+### 2.4.1
+
+### 2.4.2
+
+### 2.4.3
+
+## 2.5 - Introduction to CMAC
+
+## 2.6 - Control with CMAC
+
+### 2.6.1
+
+### 2.6.2
+
+### 2.6.3
+
+### 2.6.4
+
+### 2.6.5
+
+### 2.6.6
+
+### 2.6.7
+
+## 2.7 - Adaptive filter controller
+
+### 2.7.2
+
+### 2.7.3
+
+### 2.7.4### 2.7.4
