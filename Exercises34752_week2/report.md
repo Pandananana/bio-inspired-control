@@ -80,19 +80,19 @@ The bigger the delay, the bigger the oscillations become, and when the delay is 
 The system can cope when the proportional (gain) parameter is lowered and the derivative (damping) parameter is raised. When keeping the delay and proportional parameter stable then the derivative parameter is very sensitive when lowered. And when keeping the derivative parameter stable and then raising the gain the proportional parameter is not as unstable as the derivative parameter was.
 
 Normal plot (kp = 200 and kd = 11.0)
-![alt text](image-5.png)
+![alt text](Normal_2_2_3.png)
 
 kp = 300 (kd = 11.0)
-![alt text](image-6.png)
+![alt text](kp_300_2_2_3.png)
 
 kp = 100 (kd = 11.0)
-![alt text](image-7.png)
+![alt text](kp_100_2_2_3.png)
 
 kd = 2.0 (kp = 200)
-![alt text](image-8.png)
+![alt text](kd_2_2_2_3.png)
 
 kd = 20.0 (kp = 200)
-![alt text](image-9.png)
+![alt text](kd_20_2_2_3.png)
 
 ## 2.3 - Feedback and feedforward control
 
