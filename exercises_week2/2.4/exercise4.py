@@ -21,7 +21,7 @@ desired_end_pos = np.pi/2
 w1 = 0
 w2 = 0 
 # learning rate
-alpha = 1e-5
+alpha = 0.0001
 
 # weight histories
 w1_hist=[]
@@ -30,8 +30,7 @@ w2_hist=[]
 delay_true = 10 # time steps
 
 # TODO: change delay_estimate
-delay_estimate = 10
-
+delay_estimate = 9
 
 n_trials = 40
 

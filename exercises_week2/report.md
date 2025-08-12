@@ -149,6 +149,13 @@ Here, we plotted the weights over the learning trials. As we can see, the weight
 ![alt text](image-5.png)
 
 ### 2.4.3
+When the delay is not precisely known, the error in general remains quite big. It can be noticed, that if the delay is estimated shorter, that it actually is, that the training improves the performance. But if the delay is estimated longer, the training makes the error even worse.
+
+For a estimated delay of 9 time steps:
+![alt text](Figure_2_4_3_1.png)
+
+For a estimated delay of 11 time steps:
+![alt text](Figure_2_4_3_2.png)
 
 ## 2.5 - Introduction to CMAC
 
