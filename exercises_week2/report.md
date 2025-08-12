@@ -179,14 +179,65 @@ With higher n_examples, less epochs are needed for the learning to converge. How
 ## 2.6 - Control with CMAC
 
 ### 2.6.1
+The code with just the PD controller with the original values leads to this output.
+
+![alt text](2-6-1.png)
 
 ### 2.6.2
+After changing the values of the PD controller to:
+
+```python
+## Feedback controller variables
+Kp = 150
+Kv = 10
+```
+![alt text](2-6-2.png)
 
 ### 2.6.3
+For the new sinus trajectory, we changed this in the code:
+
+In the initialization:
+```python
+## TODO: Define parameters for periodic reference trajectory
+A = np.pi
+T = 5
+```
+In the loop:
+```python
+## TODO: Calculate the reference at this time step
+# theta_ref = np.pi/4
+theta_ref = A*np.sin(2*np.pi/T*t)
+```
+The new trajectory is now looking like that for 5 trials:
+![alt text](2-6-3.png)
 
 ### 2.6.4
+The CMAC is initialized like this in the code:
+
+```python
+## TODO: CMAC initialization
+n_rfs = 11
+min = [0, 0]
+max = [1, 1]
+beta = 1e-1
+
+c = CMAC(n_rfs=n_rfs, xmin=min, xmax=max, beta=beta)
+```
+
+In the loop the CMAC is then used for the control and learns through the trials.
+
+```python
+## TODO: Implement the CMAC controller into the loop
+tau_cmac = c.predict([theta_ref, theta])
+c.learn(tau_m)
+    
+tau = tau_m + tau_cmac
+```
 
 ### 2.6.5
+For a learning rate of 1e-1 the average trial error is declining like shown in the plot. After around 60 to 80 trials the error is just declining minimally.
+
+![alt text](Figure_2_6_5.png)
 
 ### 2.6.6
 We ran the model for two higher frequencies and one lower. We see that the model handles the lower frequency well, but struggles with the higher frequencies. 
@@ -201,4 +252,6 @@ It would definetely be possible to include a 3rd input variable. The code would 
 
 ### 2.7.3
 
-### 2.7.4### 2.7.4
+### 2.7.4
+
+### 2.7.4
