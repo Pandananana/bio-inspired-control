@@ -189,8 +189,11 @@ With higher n_examples, less epochs are needed for the learning to converge. How
 ### 2.6.5
 
 ### 2.6.6
+We ran the model for two higher frequencies and one lower. We see that the model handles the lower frequency well, but struggles with the higher frequencies. 
+![alt text](2-6-6.png)
 
 ### 2.6.7
+It would definetely be possible to include a 3rd input variable. The code would need to be expanded as it is coded for input size 2, but theoretically it isn't an issue to include more. The amount of receptive fields could be increased as well, to lessen overlap from introducing more variables. 
 
 ## 2.7 - Adaptive filter controller
 
