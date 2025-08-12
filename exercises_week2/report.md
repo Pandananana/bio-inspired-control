@@ -159,6 +159,23 @@ For a estimated delay of 11 time steps:
 
 ## 2.5 - Introduction to CMAC
 
+Keeping N=5, and increasing sigma to 2.0, results in a good model.
+
+This is the receptive field plot, showing relatively large overlap between fields
+
+![alt text](Figure_2_5_N10_S2_Field_Plot.png)
+
+This is the output, showing low error. The epochs was increased to 2000 since 100 was not high enough for the learning to converge.
+
+![alt text](Figure_2_5_N5_S2.png)
+
+The MSE shows learning has converged
+
+![alt text](Figure_2_5_N5_S2_MSE.png)
+
+With higher n_examples, less epochs are needed for the learning to converge. However the MSE remains roughly the same. To test if the order of the examples mattered, we randomized x, and it had no effect on the output.
+
+
 ## 2.6 - Control with CMAC
 
 ### 2.6.1
