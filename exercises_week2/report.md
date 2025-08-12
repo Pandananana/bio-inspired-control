@@ -145,6 +145,9 @@ An alpha of 1e-3 is too high, it encounters a runtime overflow error, and doesn'
 
 ### 2.4.2
 
+Here, we plotted the weights over the learning trials. As we can see, the weights converge. 
+![alt text](image-5.png)
+
 ### 2.4.3
 
 ## 2.5 - Introduction to CMAC
