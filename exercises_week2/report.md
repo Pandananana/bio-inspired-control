@@ -130,6 +130,19 @@ Here the model doesn't recognize the disturbance, so it doesn't settle back the 
 
 ### 2.4.1
 
+With an alpha of 1e-4, the last trial error is minimal.
+
+![alt text](Figure_2_4_1_1.png)
+
+An alpha of 1e-5 is tool low for the given number of trials. There is still a noticeable error on the last trial
+
+![alt text](Figure_2_4_1_2.png)
+
+An alpha of 1e-3 is too high, it encounters a runtime overflow error, and doesn't converge.
+
+![alt text](Figure_2_4_1_3.png)
+
+
 ### 2.4.2
 
 ### 2.4.3
