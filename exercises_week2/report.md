@@ -248,10 +248,8 @@ It would definetely be possible to include a 3rd input variable. The code would 
 
 ## 2.7 - Adaptive filter controller
 
-### 2.7.2
-
 ### 2.7.3
 
 ### 2.7.4
 
-### 2.7.4
+### 2.7.5
