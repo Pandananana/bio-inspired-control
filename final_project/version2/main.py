@@ -37,22 +37,40 @@ api.setAccurate(accurateX, accurateY, module)
 # Your DH table: Link 1: d=0, θ=0, a=5, α=90°
 #                Link 2: d=0, θ=0, a=10, α=0°
 
+# Create robot with joint limits
 robot = rtb.DHRobot(
     [
-        rtb.RevoluteDH(d=0, a=5, alpha=np.pi / 2),  # Link 1
-        rtb.RevoluteDH(d=0, a=10, alpha=0),  # Link 2
+        rtb.RevoluteDH(
+            d=0, a=5, alpha=np.pi / 2, qlim=[-np.pi / 2, np.pi / 2]
+        ),  # Link 1: -90° to 90°
+        rtb.RevoluteDH(
+            d=0, a=10, alpha=0, qlim=[-np.pi / 2, np.pi / 2]
+        ),  # Link 2: -90° to 90°
     ],
     name="Fable",
 )
 
-# Forward kinematics
-q = [0, 0]  # joint angles in radians
-T = robot.fkine(q)  # 4x4 transformation matrix
-print("End effector pose:")
-print(T)
+# Define target XYZ position (you can modify these values)
+target_x = -8.0  # X coordinate
+target_y = 5.0  # Y coordinate
+target_z = 0.0  # Z coordinate (assuming planar movement)
 
-# Inverse kinematics (what you want!)
-q_solution = robot.ikine_LM(T)  # Levenberg-Marquardt solver
-print("Joint angles:", q_solution.q)
+print(f"Target position: X={target_x}, Y={target_y}, Z={target_z}")
 
-api.setPos(q_solution.q[0], q_solution.q[1], module)
+# Create target pose matrix (4x4 transformation matrix)
+# We'll use identity rotation (don't care about orientation)
+target_pose = np.eye(4)
+target_pose[0, 3] = target_x  # X translation
+target_pose[1, 3] = target_y  # Y translation
+target_pose[2, 3] = target_z  # Z translation
+
+print("Target pose matrix:")
+print(target_pose)
+
+# Inverse kinematics to find joint angles
+q_solution = robot.ikine_LM(target_pose)  # Levenberg-Marquardt solver
+print("Joint angles (degrees):", np.degrees(q_solution.q))
+
+# Move robot to the calculated joint angles
+api.setPos(np.degrees(q_solution.q[0]), np.degrees(q_solution.q[1]), module)
+api.sleep(5)
