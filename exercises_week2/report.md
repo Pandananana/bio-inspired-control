@@ -248,7 +248,21 @@ It would definetely be possible to include a 3rd input variable. The code would 
 
 ## 2.7 - Adaptive filter controller
 
+We copied the simulation loop from exercise 6
+
 ### 2.7.3
+
+Below are 3 different test with different number of bases. The number of bases doesn't seem to affect the accuracy, but the convergence time is quicker with more bases
+
+2 Bases:
+![alt text](Figure_2_7_3_N5_Trial200.png)
+
+5 Bases:
+![alt text](Figure_2_7_3_N5_Trial200.png)
+
+10 Bases:
+![alt text](Figure_2_7_3_N10_Trial200.png)
+
 
 ### 2.7.4
 
