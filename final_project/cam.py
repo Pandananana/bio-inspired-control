@@ -26,12 +26,10 @@ def show_droidcam_feed(url: str):
             print("Can't receive frame")
             break
 
-        # rotate the frame
-        frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
-
         # Original shape (1280, 720, 3)
         # Resize the frame to fit the window
-        frame = cv2.resize(frame, (360, 640))
+        frame = cv2.resize(frame, (640, 360))
+
         locate(frame)
 
         # Display the frame
@@ -74,4 +72,4 @@ def locate(img):
 
 
 if __name__ == "__main__":
-    show_droidcam_feed("http://172.20.10.11:4747/video")
+    show_droidcam_feed(0)
