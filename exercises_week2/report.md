@@ -266,4 +266,4 @@ Below are 3 different test with different number of bases. The number of bases d
 
 ### 2.7.4
 
-### 2.7.5
+The adaptive filter with many bases learns faster than the CMAC. In general, we are also achieving better results with the adaptive filter.
