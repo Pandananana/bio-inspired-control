@@ -217,8 +217,8 @@ The CMAC is initialized like this in the code:
 ```python
 ## TODO: CMAC initialization
 n_rfs = 11
-min = [0, 0]
-max = [1, 1]
+min = [-np.pi, -np.pi] 
+max = [np.pi, np.pi] 
 beta = 1e-1
 
 c = CMAC(n_rfs=n_rfs, xmin=min, xmax=max, beta=beta)

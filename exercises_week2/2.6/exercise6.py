@@ -28,9 +28,9 @@ Kv = 10
 A = np.pi  # Amplitude 
 T = 5.0    # Period in seconds
 
-
 ## CMAC initialization
 n_rfs = 11  # Number of radial basis functions
+
 # Define input ranges for CMAC (theta_ref and theta)
 xmin = [-np.pi, -np.pi]  # Minimum values for [theta_ref, theta]
 xmax = [np.pi, np.pi]    # Maximum values for [theta_ref, theta]
