@@ -2,6 +2,7 @@ import time
 import roboticstoolbox as rtb
 import numpy as np
 from FableAPI.fable_init import api
+from spatialmath import SE3
 
 
 class Fable:
@@ -18,9 +19,10 @@ class Fable:
         self.robot = rtb.DHRobot(
             [
                 rtb.RevoluteDH(d=0, a=5, alpha=np.pi / 2, qlim=[-np.pi / 2, np.pi / 2]),
-                rtb.RevoluteDH(d=0, a=10, alpha=0, qlim=[-np.pi / 2, np.pi / 2]),
+                rtb.RevoluteDH(d=0, a=20, alpha=0, qlim=[-np.pi / 2, np.pi / 2]),
             ],
             name="Fable",
+            base=SE3(0, 0, 22) * SE3.RPY(0, -np.deg2rad(90), -np.deg2rad(90)),
         )
 
     def moveToPosition(self, tau_1, tau_2):
