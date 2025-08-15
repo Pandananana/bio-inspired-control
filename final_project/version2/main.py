@@ -4,7 +4,7 @@ from spatialmath import SE3
 fable = Fable(connection=True)
 
 # Define the target point
-point = SE3.Trans(0, 50, 0)
+point = SE3.Trans(-20, 20, 0)
 
 # Try to solve inverse kinematics with error handling
 solution = fable.inverseKinematics(point)

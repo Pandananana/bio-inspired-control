@@ -59,7 +59,6 @@ class Fable:
                 0,
                 0,
             ],  # Only consider position (x,y,z), ignore orientation
-            tol=1e-6,
             slimit=1000,
         )
         if not sol[1]:
