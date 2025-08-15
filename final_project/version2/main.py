@@ -1,7 +1,7 @@
 from fable import Fable
 from spatialmath import SE3
 
-fable = Fable(connection=False)
+fable = Fable(connection=True)
 
 # Define the target point
 point = SE3.Trans(0, 50, 0)
@@ -25,7 +25,7 @@ print(calculated_point)
 
 print(f"Position error: {fable.getPositionError(point, calculated_point):.6f}")
 
-# fable.setLaserPosition(point)
+fable.setLaserPosition(point)
 
 # Plot the robot in the solution configuration
 # fable.robot.plot(solution, backend="pyplot")
