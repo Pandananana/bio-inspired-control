@@ -1,0 +1,36 @@
+[project]
+name = "code"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "psutil",
+    "pylint",
+    "pyserial",
+    "torch",
+    "torchvision",
+    "opencv-python",
+    "fableapi",
+    "camera-tools",
+    "pandas",
+    "tqdm",
+    "jupyter>=1.1.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pylint",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pylint",
+]
+
+[tool.uv.sources]
+fableapi = {path = "../additions/fable_2_api"}
+camera-tools = {path = "../additions/exercise_camera_tools"}

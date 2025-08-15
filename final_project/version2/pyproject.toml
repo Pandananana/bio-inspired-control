@@ -1,0 +1,17 @@
+[project]
+name = "version2"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.8,<3.13"
+dependencies = [
+    "numpy<2.0",
+    "roboticstoolbox-python",
+    "fableapi",
+    "psutil",
+    "serial",
+    "pyserial",
+]
+
+[tool.uv.sources]
+fableapi = {path = "../../additions/fable_2_api"}

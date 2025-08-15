@@ -2,9 +2,9 @@
 .direnv
 __pycache__
 .python-version
-pyproject.toml
 uv.lock
 .envrc
 shell.nix
 DS_Store
 __MACOSX
+.claude
