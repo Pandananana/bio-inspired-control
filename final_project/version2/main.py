@@ -10,18 +10,34 @@ fable = Fable()
 
 robot = rtb.DHRobot(
     [
-        rtb.RevoluteDH(d=0, a=5, alpha=np.pi / 2, qlim=[-np.pi / 2, np.pi / 2]),
-        rtb.RevoluteDH(d=0, a=9.5, alpha=np.deg2rad(-90), qlim=[-np.pi / 2, np.pi / 2]),
-        rtb.PrismaticDH(a=0, theta=0, alpha=0),
+        rtb.RevoluteDH(
+            d=0, a=5, alpha=np.deg2rad(90), qlim=[np.deg2rad(-90), np.deg2rad(90)]
+        ),
+        rtb.RevoluteDH(
+            d=0, a=9.5, alpha=np.deg2rad(-90), qlim=[np.deg2rad(-90), np.deg2rad(90)]
+        ),
     ],
     name="Fable",
     base=SE3(0, 0, 22) * SE3.RPY(0, -np.deg2rad(90), -np.deg2rad(90)),
 )
 
-point = SE3.Trans(0, -10, 55)
-sol = robot.ik_LM(point)  # solve IK
+point = SE3.Trans(-8.286, 6.718, 30.29)
+print("Point:")
+print(point)
+
+sol = robot.ik_LM(
+    Tep=point,
+    mask=[1, 1, 1, 0, 0, 0],  # Only consider position (x,y,z), ignore orientation
+    tol=1e-5,
+)  # solve IK
+
+success = sol[1]
+if not success:
+    print("No solution found")
+    exit()
 
 q_pickup = sol[0]
+# q_pickup = [np.deg2rad(-45), np.deg2rad(45)]
 
 fable.moveToPosition(np.rad2deg(q_pickup[0]), np.rad2deg(q_pickup[1]))
 print("Solution: ", sol[0])
