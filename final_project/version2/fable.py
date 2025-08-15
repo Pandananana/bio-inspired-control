@@ -49,7 +49,7 @@ class Fable:
         self.setMotorAngles(np.rad2deg(angles[0]), np.rad2deg(angles[1]))
 
     def inverseKinematics(self, point):
-        sol = self.robot.ik_LM(
+        sol = self.robot.ik_GN(
             Tep=point,
             mask=[
                 1,
@@ -62,11 +62,15 @@ class Fable:
             tol=1e-6,
             slimit=1000,
         )
-        if sol[1]:
-            return sol[0]
-        else:
+        if not sol[1]:
             print("No solution found")
-            exit()
+        return sol[0]
+
+    def forwardKinematics(self, angles):
+        return self.robot.fkine(angles)
 
     def getBattery(self):
         return self.api.getBattery(self.module)
+
+    def getPositionError(self, point1, point2):
+        return np.linalg.norm(point1.t[:3] - point2.t[:3])

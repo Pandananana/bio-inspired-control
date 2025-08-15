@@ -3,22 +3,34 @@ import roboticstoolbox as rtb
 import numpy as np
 from FableAPI.fable_init import api
 from fable import Fable
-import roboticstoolbox as rtb
 from spatialmath import SE3
 
 fable = Fable(connection=False)
 
+# Define the target point
+point = SE3.Trans(0, 50, 0)
 
-point = SE3.Trans(0, 36.5, 36.5)
-
+# Try to solve inverse kinematics with error handling
 solution = fable.inverseKinematics(point)
-print("Solution:")
+
+# This solution = [0, 0, 50] should equal point = SE3.Trans(14.5, 0, 10)
+calculated_point = fable.forwardKinematics(solution)
+
+## Logging
+print("\n=== Results ===")
+print("Target point:")
+print(point)
+print("Solution (joint angles):")
 print(solution)
+print("Calculated point from solution:")
+print(calculated_point)
+
+# Check if the solution is close to the target
+
+print(f"Position error: {fable.getPositionError(point, calculated_point):.6f}")
 
 # fable.setLaserPosition(point)
 
-fable.robot.plot(solution, backend="pyplot")
-
-# Wait for q key input
-while True:
-    time.sleep(60)
+# Plot the robot in the solution configuration
+# fable.robot.plot(solution, backend="pyplot")
+fable.robot.teach(solution)
