@@ -31,7 +31,7 @@ class Fable:
                     alpha=np.deg2rad(-90),
                     qlim=[np.deg2rad(-90), np.deg2rad(90)],
                 ),
-                # rtb.PrismaticDH(a=0, theta=0, alpha=0, qlim=[0, 100]),
+                rtb.PrismaticDH(a=0, theta=0, alpha=0, qlim=[0, 100]),
             ],
             name="Fable",
             base=SE3(0, 0, 22) * SE3.RPY(0, -np.deg2rad(90), -np.deg2rad(90)),
@@ -49,8 +49,8 @@ class Fable:
         self.setMotorAngles(np.rad2deg(angles[0]), np.rad2deg(angles[1]))
 
     def inverseKinematics(self, point):
-        sol = self.robot.ik_LM(
-            Tep=point,
+        sol = self.robot.ikine_LM(
+            T=point,
             mask=[
                 1,
                 1,

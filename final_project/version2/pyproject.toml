@@ -6,7 +6,8 @@ readme = "README.md"
 requires-python = ">=3.8,<3.13"
 dependencies = [
     "numpy<2.0",
-    "roboticstoolbox-python",
+    "roboticstoolbox-python==1.0.3",
+    "scipy<1.9.0",
     "fableapi",
     "psutil",
     "serial",

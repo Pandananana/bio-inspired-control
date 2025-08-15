@@ -1,14 +1,10 @@
-import time
-import roboticstoolbox as rtb
-import numpy as np
-from FableAPI.fable_init import api
 from fable import Fable
 from spatialmath import SE3
 
 fable = Fable(connection=False)
 
 # Define the target point
-point = SE3.Trans(5.129, 4.29, 34.462)
+point = SE3.Trans(0, 50, 0)
 
 # Try to solve inverse kinematics with error handling
 solution = fable.inverseKinematics(point)
