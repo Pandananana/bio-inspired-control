@@ -12,6 +12,7 @@ class Fable:
         moduleids = self.api.discoverModules()
         self.module = moduleids[0] if moduleids else None
         print("Found modules: ", moduleids)
+        print("Battery: ", self.getBattery())
 
         ## Robotics Toolbox
         self.robot = rtb.DHRobot(
@@ -28,3 +29,6 @@ class Fable:
         # Wait until both motors stop moving
         while api.getMoving(0, self.module) or api.getMoving(1, self.module):
             time.sleep(0.01)  # Small delay to avoid busy waiting
+
+    def getBattery(self):
+        return self.api.getBattery(self.module)
