@@ -11,6 +11,7 @@ dependencies = [
     "psutil",
     "serial",
     "pyserial",
+    "matplotlib==3.7.3",
 ]
 
 [tool.uv.sources]
