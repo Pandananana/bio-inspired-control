@@ -28,7 +28,7 @@ class Fable:
                 ),
                 rtb.RevoluteDH(
                     d=0,
-                    a=9.5,
+                    a=8.5, #9.5,
                     alpha=np.deg2rad(-90),
                     qlim=[np.deg2rad(-90), np.deg2rad(90)],
                 ),
@@ -81,3 +81,21 @@ class Fable:
 
     def getPositionError(self, point1, point2):
         return np.linalg.norm(point1.t[:3] - point2.t[:3])
+    
+def camera_to_global_coordinates(self, X, Y, Z, angles):
+    """
+    Convert camera coordinates (X,Y,Z) to global coordinates.
+    T_cam_ee : extrinsic transform from end-effector to camera (default identity if aligned)
+    """
+    # Extrinsic transform from end-effector to camera
+    T_cam_ee = SE3(0, 0, 2) * SE3.RPY(0, 0, 0)
+
+    # Point in camera frame
+    p_cam = SE3(X, Y, Z)
+
+    # End-effector pose in global frame
+    T_world_ee = self.forwardKinematics([angles[0], angles[1], 0])
+
+    # Transform point to global frame
+    p_global = T_world_ee * T_cam_ee * p_cam
+    return p_global.t[:3]
