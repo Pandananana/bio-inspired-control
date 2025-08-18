@@ -9,6 +9,7 @@ class Fable:
     def __init__(self, connection=True):
         ## Fable API
         self.api = api
+        self.connection = connection
         if connection:
             self.api.setup(blocking=True)
             moduleids = self.api.discoverModules()
@@ -38,6 +39,10 @@ class Fable:
         )
 
     def setMotorAngles(self, tau_1, tau_2):
+        # Exit if not connected
+        if not self.connection:
+            return
+
         api.setPos(tau_1, tau_2, self.module)
 
         # Wait until both motors stop moving
@@ -69,6 +74,8 @@ class Fable:
         return self.robot.fkine(angles)
 
     def getBattery(self):
+        if not self.connection:
+            return None
         return self.api.getBattery(self.module)
 
     def getPositionError(self, point1, point2):
