@@ -124,8 +124,8 @@ def camera_coord(x_norm, y_norm, radius):
         Z = f * real_radius / radius  # Calculate depth based on radius
         Z = Z / 10  # Convert to cm
 
-        cam_x = x_norm * Z / 10  # Convert to cm
-        cam_y = y_norm * Z / 10  # Convert to cm
+        cam_x = x_norm * Z
+        cam_y = y_norm * Z
 
         return cam_x, cam_y, Z
     else:

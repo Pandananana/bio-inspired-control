@@ -11,8 +11,15 @@ while True:
 
     if coords is not None:
         print(f"X: {coords[0]}, Y: {coords[1]}, Z: {coords[2]}")
-        fable.setLaserPosition(SE3(coords[0], coords[1], coords[2]))
+        # fable.setLaserPosition(SE3(coords[0], coords[1], coords[2]))
 
     fable.showFrame(frame)
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
+
+
+# while True:
+#     fable.getMotorAngles()
+#     point = fable.forwardKinematics([fable.angles[0], fable.angles[1], 0])
+#     print(f"Point: {point}")
+#     time.sleep(0.1)
