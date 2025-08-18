@@ -11,8 +11,7 @@ while True:
 
     if coords is not None:
         print(f"X: {coords[0]}, Y: {coords[1]}, Z: {coords[2]}")
-        #fable.setLaserPosition(SE3(coords[0], coords[1], coords[2]))
-        print("Frame error:",fable.error_point_to_middle_frame(coords[0],coords[1]) ,"Prismatic error:",fable.error_point_to_prismatic_line(coords))
+        fable.setLaserPosition(SE3(coords[0], coords[1], coords[2]))
 
     fable.showFrame(frame)
     if cv2.waitKey(1) & 0xFF == ord("q"):
