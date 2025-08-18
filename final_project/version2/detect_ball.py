@@ -71,7 +71,6 @@ def locate(img):
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     shape = img.shape
-    center_image_center = (0, 0)
 
     if len(contours) != 0:
         # Find the largest contour
@@ -84,17 +83,18 @@ def locate(img):
         # Normalize center coordinates to be between -1 and 1
         center_x_norm = (x - (shape[1] / 2)) / (shape[1] / 2)
         center_y_norm = (y - (shape[0] / 2)) / (shape[0] / 2)
-        center_image_center = (center_x_norm, center_y_norm)
+
+        print(f"Center: {center_x_norm:.2f}, {center_y_norm:.2f}")
 
         radius = int(radius)
 
         # Draw the circle and center
         cv2.circle(img, center_upper_left_frame, radius, (0, 0, 255), 2)
         cv2.circle(img, center_upper_left_frame, 5, (0, 255, 0), -1)
+
+        return center_x_norm, center_y_norm, radius
     else:
         return ValueError("No ball found")
-
-    return center_image_center[0], center_image_center[1], radius
 
 
 def normalized_coordinates(x, y):

@@ -22,7 +22,7 @@ class Fable:
             self.api.setup(blocking=True)
             moduleids = self.api.discoverModules()
             self.module = moduleids[0] if moduleids else None
-            self.angles = self.getMotorAngles()
+            self.getMotorAngles()
             print("Found modules: ", moduleids)
             print("Battery: ", self.getBattery())
 
@@ -73,10 +73,12 @@ class Fable:
         if not self.robot_connected:
             return None
 
-        angle0 = self.api.getPos(0, self.module)
-        angle1 = self.api.getPos(1, self.module)
+        angle0 = np.deg2rad(self.api.getPos(0, self.module))
+        angle1 = np.deg2rad(self.api.getPos(1, self.module))
 
-        return np.deg2rad(angle0), np.deg2rad(angle1)
+        self.angles = angle0, angle1
+
+        return angle0, angle1
 
     def setLaserPosition(self, position):
         angles = self.inverseKinematics(position)
@@ -124,7 +126,7 @@ class Fable:
             ret, frame = self.camera.read()
 
             if not ret:
-                return ValueError("Can't receive frame")
+                return None, None
 
             x, y, r = locate(frame)
             # TODO: Undistort using the normalized coordinates function
@@ -134,9 +136,9 @@ class Fable:
                 camera_x, camera_y, camera_z
             )
             return (global_x, global_y, global_z), frame
-        except Exception as e:
-            print(f"Error: {e}")
-            return None, None
+        except Exception:
+            print("Ball not found")
+            return None, frame
 
     def camera_to_global_coordinates(self, X, Y, Z):
         """
