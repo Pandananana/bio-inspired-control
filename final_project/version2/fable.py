@@ -54,9 +54,9 @@ class Fable:
         self.setMotorAngles(np.rad2deg(angles[0]), np.rad2deg(angles[1]))
 
     def inverseKinematics(self, point):
-        sol = self.robot.ikine_LM(
-            T=point,
-            mask=[
+        sol = self.robot.ik_lm_chan(
+            Tep=point,
+            we=[
                 1,
                 1,
                 1,
@@ -64,7 +64,8 @@ class Fable:
                 0,
                 0,
             ],  # Only consider position (x,y,z), ignore orientation
-            slimit=1000,
+            slimit=10000,
+            reject_jl=True,
         )
         if not sol[1]:
             print("No solution found")
