@@ -92,7 +92,7 @@ def locate(img):
         cv2.circle(img, center_upper_left_frame, radius, (0, 0, 255), 2)
         cv2.circle(img, center_upper_left_frame, 5, (0, 255, 0), -1)
     else:
-        return None, None, None
+        return ValueError("No ball found")
 
     return center_image_center[0], center_image_center[1], radius
 
@@ -117,15 +117,19 @@ def normalized_coordinates(x, y):
 
 def camera_coord(x_norm, y_norm, radius):
     """Convert normalized coordinates to global coordinates"""
-    real_radius = 20  # mm
-    f = camera_matrix[0, 0]  # Focal length from camera matrix
-    Z = f * real_radius / radius  # Calculate depth based on radius
-    Z = Z / 10  # Convert to cm
 
-    cam_x = x_norm * Z / 10  # Convert to cm
-    cam_y = y_norm * Z / 10  # Convert to cm
+    if radius > 0:
+        real_radius = 20  # mm
+        f = camera_matrix[0, 0]  # Focal length from camera matrix
+        Z = f * real_radius / radius  # Calculate depth based on radius
+        Z = Z / 10  # Convert to cm
 
-    return cam_x, cam_y, Z
+        cam_x = x_norm * Z / 10  # Convert to cm
+        cam_y = y_norm * Z / 10  # Convert to cm
+
+        return cam_x, cam_y, Z
+    else:
+        raise ValueError("Invalid radius: must be greater than 0")
 
 
 if __name__ == "__main__":

@@ -111,51 +111,48 @@ class Fable:
         return np.linalg.norm(point1.t[:3] - point2.t[:3])
 
     def showFrame(self, frame):
-        if not self.camera_connected:
+        if not self.camera_connected or frame is None:
             return
         cv2.imshow("Camera", frame)
 
     def detectBall(self):
-        if not self.camera_connected:
-            return
+        try:
+            if not self.camera_connected:
+                return
 
-        while True:
             # Read frame
             ret, frame = self.camera.read()
 
             if not ret:
-                print("Can't receive frame")
-                break
-
-            if cv2.waitKey(1) & 0xFF == ord("q"):
-                break
+                return ValueError("Can't receive frame")
 
             x, y, r = locate(frame)
-
-            self.showFrame(frame)
-
-            if x is not None and y is not None and r is not None:
-                # TODO: Undistort using the normalized coordinates function
-                # x_norm, y_norm = normalized_coordinates(x, y)
-                camera_x, camera_y, camera_z = camera_coord(x, y, r)
-                global_x, global_y, global_z = self.camera_to_global_coordinates(
-                    camera_x, camera_y, camera_z
-                )
-                print(
-                    f"Camera: X={camera_x:.2f}, Y={camera_y:.2f}, Z={camera_z:.2f} | Global: X={global_x:.2f}, Y={global_y:.2f}, Z={global_z:.2f}"
-                )
+            # TODO: Undistort using the normalized coordinates function
+            # x_norm, y_norm = normalized_coordinates(x, y)
+            camera_x, camera_y, camera_z = camera_coord(x, y, r)
+            global_x, global_y, global_z = self.camera_to_global_coordinates(
+                camera_x, camera_y, camera_z
+            )
+            return (global_x, global_y, global_z), frame
+        except Exception as e:
+            print(f"Error: {e}")
+            return None, None
 
     def camera_to_global_coordinates(self, X, Y, Z):
         """
         Convert camera coordinates (X,Y,Z) to global coordinates.
         T_cam_ee : extrinsic transform from end-effector to camera (default identity if aligned)
         """
+
         # Extrinsic transform from end-effector to camera
         # Camera is 2cm above the end-effector, 7cm in front of the end-effector
         T_cam_ee = SE3(2, 0, 7) * SE3.RPY(0, 0, np.deg2rad(90))
 
         # Point in camera frame (convert from mm to cm)
         p_cam = SE3(X, Y, Z)
+
+        # Get latest angles
+        self.angles = self.getMotorAngles()
 
         # End-effector pose in global frame
         T_world_ee = self.forwardKinematics([self.angles[0], self.angles[1], 0])
