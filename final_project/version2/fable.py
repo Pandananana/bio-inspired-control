@@ -135,6 +135,7 @@ class Fable:
             self.showFrame(frame)
 
             if x is not None and y is not None and r is not None:
+                # TODO: Undistort using the normalized coordinates function
                 # x_norm, y_norm = normalized_coordinates(x, y)
                 camera_x, camera_y, camera_z = camera_coord(x, y, r)
                 global_x, global_y, global_z = self.camera_to_global_coordinates(
@@ -150,10 +151,11 @@ class Fable:
         T_cam_ee : extrinsic transform from end-effector to camera (default identity if aligned)
         """
         # Extrinsic transform from end-effector to camera
-        T_cam_ee = SE3(0, 0, 2) * SE3.RPY(0, 0, 0)
+        # Camera is 2cm above the end-effector, 7cm in front of the end-effector
+        T_cam_ee = SE3(2, 0, 7) * SE3.RPY(0, 0, np.deg2rad(90))
 
         # Point in camera frame (convert from mm to cm)
-        p_cam = SE3(Y / 10, X / 10, Z / 10)
+        p_cam = SE3(X, Y, Z)
 
         # End-effector pose in global frame
         T_world_ee = self.forwardKinematics([self.angles[0], self.angles[1], 0])
