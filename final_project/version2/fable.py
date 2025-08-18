@@ -3,19 +3,36 @@ import roboticstoolbox as rtb
 import numpy as np
 from FableAPI.fable_init import api
 from spatialmath import SE3
+from detect_ball import (
+    locate,
+    normalized_coordinates,
+    camera_coord,
+    distortion_coefficients,
+    camera_matrix,
+)
+import cv2
 
 
 class Fable:
-    def __init__(self, connection=True):
+    def __init__(self, robot_connected=True, camera_connected=True, camera_index=1):
         ## Fable API
         self.api = api
-        self.connection = connection
-        if connection:
+        self.robot_connected = robot_connected
+        if robot_connected:
             self.api.setup(blocking=True)
             moduleids = self.api.discoverModules()
             self.module = moduleids[0] if moduleids else None
+            self.angles = self.getMotorAngles()
             print("Found modules: ", moduleids)
             print("Battery: ", self.getBattery())
+
+        ## Camera
+        self.camera_connected = camera_connected
+        if camera_connected:
+            self.camera = cv2.VideoCapture(camera_index)
+            if not self.camera.isOpened():
+                print("Cannot open camera")
+                exit()
 
         ## Robotics Toolbox
         self.robot = rtb.DHRobot(
@@ -28,7 +45,7 @@ class Fable:
                 ),
                 rtb.RevoluteDH(
                     d=0,
-                    a=8.5, #9.5,
+                    a=8.5,  # 9.5,
                     alpha=np.deg2rad(-90),
                     qlim=[np.deg2rad(-90), np.deg2rad(90)],
                 ),
@@ -37,11 +54,10 @@ class Fable:
             name="Fable",
             base=SE3(0, 0, 23) * SE3.RPY(0, -np.deg2rad(90), -np.deg2rad(90)),
         )
-        print(self.robot.n)
 
     def setMotorAngles(self, tau_1, tau_2):
         # Exit if not connected
-        if not self.connection:
+        if not self.robot_connected:
             return
 
         api.setPos(tau_1, tau_2, self.module)
@@ -49,6 +65,18 @@ class Fable:
         # Wait until both motors stop moving
         while api.getMoving(0, self.module) or api.getMoving(1, self.module):
             time.sleep(0.01)  # Small delay to avoid busy waiting
+
+        self.angles = self.getMotorAngles()
+
+    def getMotorAngles(self):
+        # Exit if not connected
+        if not self.robot_connected:
+            return None
+
+        angle0 = self.api.getPos(0, self.module)
+        angle1 = self.api.getPos(1, self.module)
+
+        return np.deg2rad(angle0), np.deg2rad(angle1)
 
     def setLaserPosition(self, position):
         angles = self.inverseKinematics(position)
@@ -75,27 +103,61 @@ class Fable:
         return self.robot.fkine(angles)
 
     def getBattery(self):
-        if not self.connection:
+        if not self.robot_connected:
             return None
         return self.api.getBattery(self.module)
 
     def getPositionError(self, point1, point2):
         return np.linalg.norm(point1.t[:3] - point2.t[:3])
-    
-def camera_to_global_coordinates(self, X, Y, Z, angles):
-    """
-    Convert camera coordinates (X,Y,Z) to global coordinates.
-    T_cam_ee : extrinsic transform from end-effector to camera (default identity if aligned)
-    """
-    # Extrinsic transform from end-effector to camera
-    T_cam_ee = SE3(0, 0, 2) * SE3.RPY(0, 0, 0)
 
-    # Point in camera frame
-    p_cam = SE3(X, Y, Z)
+    def showFrame(self, frame):
+        if not self.camera_connected:
+            return
+        cv2.imshow("Camera", frame)
 
-    # End-effector pose in global frame
-    T_world_ee = self.forwardKinematics([angles[0], angles[1], 0])
+    def detectBall(self):
+        if not self.camera_connected:
+            return
 
-    # Transform point to global frame
-    p_global = T_world_ee * T_cam_ee * p_cam
-    return p_global.t[:3]
+        while True:
+            # Read frame
+            ret, frame = self.camera.read()
+
+            if not ret:
+                print("Can't receive frame")
+                break
+
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
+
+            x, y, r = locate(frame)
+
+            self.showFrame(frame)
+
+            if x is not None and y is not None and r is not None:
+                x_norm, y_norm = normalized_coordinates(x, y)
+                camera_x, camera_y, camera_z = camera_coord(x_norm, y_norm, r)
+                global_x, global_y, global_z = self.camera_to_global_coordinates(
+                    camera_x, camera_y, camera_z
+                )
+                print(
+                    f"Camera: X={camera_x:.2f}, Y={camera_y:.2f}, Z={camera_z:.2f} | Global: X={global_x:.2f}, Y={global_y:.2f}, Z={global_z:.2f}"
+                )
+
+    def camera_to_global_coordinates(self, X, Y, Z):
+        """
+        Convert camera coordinates (X,Y,Z) to global coordinates.
+        T_cam_ee : extrinsic transform from end-effector to camera (default identity if aligned)
+        """
+        # Extrinsic transform from end-effector to camera
+        T_cam_ee = SE3(0, 0, 2) * SE3.RPY(0, 0, 0)
+
+        # Point in camera frame (convert from mm to cm)
+        p_cam = SE3(Y / 10, X / 10, Z / 10)
+
+        # End-effector pose in global frame
+        T_world_ee = self.forwardKinematics([self.angles[0], self.angles[1], 0])
+
+        # Transform point to global frame
+        p_global = T_world_ee * T_cam_ee * p_cam
+        return p_global.t[:3]

@@ -2,10 +2,12 @@ import cv2
 import numpy as np
 
 # Camera data
-camera_matrix = np.array([[843.52203357, 0, 300.23349717],
-                            [0, 842.38018005, 259.67844506],  
-                            [0, 0, 1]])
-distortion_coefficients = np.array([0.1579545, -0.70866363, 0.00613847, -0.0072784, 1.21241335])
+camera_matrix = np.array(
+    [[843.52203357, 0, 300.23349717], [0, 842.38018005, 259.67844506], [0, 0, 1]]
+)
+distortion_coefficients = np.array(
+    [0.1579545, -0.70866363, 0.00613847, -0.0072784, 1.21241335]
+)
 
 
 def show_droidcam_feed(url: str):
@@ -34,14 +36,16 @@ def show_droidcam_feed(url: str):
 
         # Original shape (1280, 720, 3)
         # Resize the frame to fit the window
-        #frame = cv2.resize(frame, (640, 360))
+        # frame = cv2.resize(frame, (640, 360))
 
         x, y, r = locate(frame)
 
         if x is not None and y is not None and r is not None:
             x_norm, y_norm = normalized_coordinates(x, y)
-            global_x, global_y, global_z = global_coordinates(x_norm, y_norm, r)
-            print(f"Global Coordinates: X={global_x:.2f}, Y={global_y:.2f}, Z={global_z:.2f}")
+            global_x, global_y, global_z = camera_coord(x_norm, y_norm, r)
+            print(
+                f"Global Coordinates: X={global_x:.2f}, Y={global_y:.2f}, Z={global_z:.2f}"
+            )
 
         # Display the frame
         cv2.imshow("Droidcam Feed", frame)
@@ -54,6 +58,7 @@ def show_droidcam_feed(url: str):
     cap.release()
     cv2.destroyAllWindows()
     print("Disconnected")
+
 
 def locate(img):
     frame_to_thresh = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)  # LAB
@@ -80,6 +85,7 @@ def locate(img):
 
     return x, y, radius
 
+
 def normalized_coordinates(x, y):
     """Convert local coordinates to normalized image coordinates"""
 
@@ -87,7 +93,9 @@ def normalized_coordinates(x, y):
     image_point = np.array([[[x, y]]], dtype=np.float32)
 
     # Undistort the image point
-    undistorted_point = cv2.undistortPoints(image_point, camera_matrix, distortion_coefficients)
+    undistorted_point = cv2.undistortPoints(
+        image_point, camera_matrix, distortion_coefficients
+    )
 
     # normalized coordinates
     x_norm = undistorted_point[0][0][0]
@@ -95,9 +103,10 @@ def normalized_coordinates(x, y):
 
     return x_norm, y_norm
 
-def global_coordinates(x_norm, y_norm, radius):
+
+def camera_coord(x_norm, y_norm, radius):
     """Convert normalized coordinates to global coordinates"""
-    real_radius = 20 # mm
+    real_radius = 20  # mm
     f = camera_matrix[0, 0]  # Focal length from camera matrix
 
     Z = f * real_radius / radius  # Calculate depth based on radius

@@ -13,6 +13,7 @@ dependencies = [
     "serial",
     "pyserial",
     "matplotlib==3.7.3",
+    "opencv-python",
 ]
 
 [tool.uv.sources]
