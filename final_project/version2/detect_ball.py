@@ -66,24 +66,31 @@ def locate(img):
 
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+    shape = img.shape
+    center_image_center = (0, 0)
+
     if len(contours) != 0:
         # Find the largest contour
         c = max(contours, key=cv2.contourArea)
 
         # Get the minimum enclosing circle
         (x, y), radius = cv2.minEnclosingCircle(c)
-        center = (int(x), int(y))
+        center_upper_left_frame = (int(x), int(y))
+
+        # Normalize center coordinates to be between -1 and 1
+        center_x_norm = (x - (shape[1] / 2)) / (shape[1] / 2)
+        center_y_norm = (y - (shape[0] / 2)) / (shape[0] / 2)
+        center_image_center = (center_x_norm, center_y_norm)
+
         radius = int(radius)
 
         # Draw the circle and center
-        cv2.circle(img, center, radius, (0, 0, 255), 2)
-        cv2.circle(img, center, 5, (0, 255, 0), -1)
+        cv2.circle(img, center_upper_left_frame, radius, (0, 0, 255), 2)
+        cv2.circle(img, center_upper_left_frame, 5, (0, 255, 0), -1)
     else:
-        x = None
-        y = None
-        radius = None
+        return None, None, None
 
-    return x, y, radius
+    return center_image_center[0], center_image_center[1], radius
 
 
 def normalized_coordinates(x, y):
@@ -107,9 +114,15 @@ def normalized_coordinates(x, y):
 def camera_coord(x_norm, y_norm, radius):
     """Convert normalized coordinates to global coordinates"""
     real_radius = 20  # mm
-    f = camera_matrix[0, 0]  # Focal length from camera matrix
+    # f = camera_matrix[0, 0]  # Focal length from camera matrix
 
-    Z = f * real_radius / radius  # Calculate depth based on radius
+    # The 1400 is a constant that was found by trial and error, diameter is 2cm, focal length is 1400mm
+    # 175 radius at 16cm
+    # 16cm = f * 2cm / 175R -> f = 1400
+    if radius > 0:
+        Z = 1400 * real_radius / radius  # Calculate depth based on radius
+    else:
+        Z = 0
 
     global_x = x_norm * Z
     global_y = y_norm * Z

@@ -135,8 +135,8 @@ class Fable:
             self.showFrame(frame)
 
             if x is not None and y is not None and r is not None:
-                x_norm, y_norm = normalized_coordinates(x, y)
-                camera_x, camera_y, camera_z = camera_coord(x_norm, y_norm, r)
+                # x_norm, y_norm = normalized_coordinates(x, y)
+                camera_x, camera_y, camera_z = camera_coord(x, y, r)
                 global_x, global_y, global_z = self.camera_to_global_coordinates(
                     camera_x, camera_y, camera_z
                 )
