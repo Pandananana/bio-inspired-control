@@ -1,12 +1,16 @@
 import cv2
 import numpy as np
 
-# Camera data
+# Camera data (from ASTA with big chessboard 6x9, 87mm square size)
 camera_matrix = np.array(
-    [[843.52203357, 0, 300.23349717], [0, 842.38018005, 259.67844506], [0, 0, 1]]
+    [
+        [1.40068157e03, 0.00000000e00, 6.11754801e02],
+        [0.00000000e00, 1.39601724e03, 3.77394910e02],
+        [0.00000000e00, 0.00000000e00, 1.00000000e00],
+    ]
 )
 distortion_coefficients = np.array(
-    [0.1579545, -0.70866363, 0.00613847, -0.0072784, 1.21241335]
+    [1.55261819e-01, -7.87973206e-01, -2.48189023e-05, -4.35561861e-03, 1.04410200e00]
 )
 
 
@@ -114,20 +118,13 @@ def normalized_coordinates(x, y):
 def camera_coord(x_norm, y_norm, radius):
     """Convert normalized coordinates to global coordinates"""
     real_radius = 20  # mm
-    # f = camera_matrix[0, 0]  # Focal length from camera matrix
+    f = camera_matrix[0, 0]  # Focal length from camera matrix
+    Z = f * real_radius / radius  # Calculate depth based on radius
 
-    # The 1400 is a constant that was found by trial and error, diameter is 2cm, focal length is 1400mm
-    # 175 radius at 16cm
-    # 16cm = f * 2cm / 175R -> f = 1400
-    if radius > 0:
-        Z = 1400 * real_radius / radius  # Calculate depth based on radius
-    else:
-        Z = 0
+    cam_x = x_norm * Z
+    cam_y = y_norm * Z
 
-    global_x = x_norm * Z
-    global_y = y_norm * Z
-
-    return global_x, global_y, Z
+    return cam_x, cam_y, Z
 
 
 if __name__ == "__main__":

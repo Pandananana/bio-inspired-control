@@ -2,19 +2,21 @@ import numpy as np
 import cv2 as cv
 import os
 
+
 # Camera initialization
 def initialize_camera():
-    cap = cv.VideoCapture(1)
+    cap = cv.VideoCapture(0)
     if not cap.isOpened():
         print("Cannot open camera")
         return None
     return cap
 
+
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
 # Prepare object points (chessboard 9x6 inner corners)
-square_size = 25.0  # Set your square size here (e.g., 25.0 mm)
-objp = np.zeros((6*9, 3), np.float32)
+square_size = 87.0  # Set your square size here (e.g., 25.0 mm)
+objp = np.zeros((6 * 9, 3), np.float32)
 objp[:, :2] = np.mgrid[0:9, 0:6].T.reshape(-1, 2) * square_size
 
 objpoints = []  # 3d points in real world space
@@ -44,7 +46,9 @@ else:
             imgpoints.append(corners2)
 
             # Save the original frame (without corners drawn)
-            img_filename = os.path.join(save_dir, f"calibration_frame_{len(objpoints)}.png")
+            img_filename = os.path.join(
+                save_dir, f"calibration_frame_{len(objpoints)}.png"
+            )
             cv.imwrite(img_filename, frame)
 
             # For display, draw corners on a copy
@@ -53,7 +57,7 @@ else:
         else:
             frame_corners = frame
 
-        cv.imshow('img', frame_corners)
+        cv.imshow("img", frame_corners)
         key = cv.waitKey(1)
         if key == 27:  # ESC to exit
             break
@@ -63,4 +67,3 @@ else:
 
     cap.release()
     cv.destroyAllWindows()
-

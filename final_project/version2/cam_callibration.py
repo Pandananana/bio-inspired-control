@@ -5,12 +5,18 @@ import glob
 # Chessboard size
 chessboard_size = (9, 6)
 
+# Square size in millimeters (or whatever unit you prefer)
+square_size = 87.0  # Adjust this to your actual square size
+
 # Termination criteria for cornerSubPix
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
 # Prepare object points
-objp = np.zeros((chessboard_size[1]*chessboard_size[0], 3), np.float32)
-objp[:, :2] = np.mgrid[0:chessboard_size[0], 0:chessboard_size[1]].T.reshape(-1, 2)
+objp = np.zeros((chessboard_size[1] * chessboard_size[0], 3), np.float32)
+objp[:, :2] = (
+    np.mgrid[0 : chessboard_size[0], 0 : chessboard_size[1]].T.reshape(-1, 2)
+    * square_size
+)
 
 objpoints = []  # 3D points
 imgpoints = []  # 2D points
@@ -30,7 +36,9 @@ for idx, fname in enumerate(images):
         print(f"Chessboard not found in {fname}")
 
 # Calibrate camera
-ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(
+    objpoints, imgpoints, gray.shape[::-1], None, None
+)
 print(f"Overall RMS: {ret:.4f} pixels")
 print("Camera matrix:\n", mtx)
 print("Distortion coefficients:\n", dist.ravel())
@@ -39,13 +47,13 @@ print("Distortion coefficients:\n", dist.ravel())
 total_error = 0
 for i in range(len(objpoints)):
     imgpoints2, _ = cv.projectPoints(objpoints[i], rvecs[i], tvecs[i], mtx, dist)
-    error = cv.norm(imgpoints[i], imgpoints2, cv.NORM_L2)/len(imgpoints2)
+    error = cv.norm(imgpoints[i], imgpoints2, cv.NORM_L2) / len(imgpoints2)
     print(f"{images[i]} RMS error: {error:.4f} pixels")
     total_error += error
 
 print(f"Mean reprojection error: {total_error/len(objpoints):.4f} pixels")
 
-'''
+"""
 Results
 ------------------------------------------------------------------
 Overall RMS: 0.5604 pixels
@@ -61,4 +69,18 @@ Distortion coefficients:
  Mean reprojection error: 0.0593 pixels
  -----------------------------------------------------------------
 
-'''
+"""
+
+
+"""
+Result from ASTA with big chessboard (6x9, 87mm square size)
+Camera matrix:
+ [[1.40068157e+03 0.00000000e+00 6.11754801e+02]
+ [0.00000000e+00 1.39601724e+03 3.77394910e+02]
+ [0.00000000e+00 0.00000000e+00 1.00000000e+00]]
+Distortion coefficients:
+ [ 1.55261819e-01 -7.87973206e-01 -2.48189023e-05 -4.35561861e-03
+  1.04410200e+00]
+
+  Mean reprojection error: 0.0891 pixels
+"""

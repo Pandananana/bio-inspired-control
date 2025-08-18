@@ -6,5 +6,6 @@ uv.lock
 .envrc
 shell.nix
 DS_Store
+.DS_Store
 __MACOSX
 .claude
