@@ -129,13 +129,13 @@ class Fable:
                 return None, None
 
             x, y, r = locate(frame)
-            # TODO: Undistort using the normalized coordinates function
-            # x_norm, y_norm = normalized_coordinates(x, y)
-            camera_x, camera_y, camera_z = camera_coord(x, y, r)
+            x_norm, y_norm = normalized_coordinates(x, y)
+            camera_x, camera_y, camera_z = camera_coord(x_norm, y_norm, r)
             global_x, global_y, global_z = self.camera_to_global_coordinates(
                 camera_x, camera_y, camera_z
             )
             return (global_x, global_y, global_z), frame
+
         except Exception:
             print("Ball not found")
             return None, frame
@@ -162,7 +162,7 @@ class Fable:
         # Transform point to global frame
         p_global = T_world_ee * T_cam_ee * p_cam
         return p_global.t[:3]
-      
+
     def error_point_to_prismatic_line(self, point):
         """
         Calculate the shortest distance between a 3D point and the line along the prismatic joint
@@ -187,4 +187,5 @@ class Fable:
         return distance
 
     def error_point_to_middle_frame(self, X, Y):
-        return self.getPositionError([X,Y],[0,0])        
+        # Calculate the Euclidean distance from (X, Y) to (0, 0)
+        return np.sqrt((X - 0) ** 2 + (Y - 0) ** 2)

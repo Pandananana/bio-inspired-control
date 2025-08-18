@@ -78,21 +78,15 @@ def locate(img):
 
         # Get the minimum enclosing circle
         (x, y), radius = cv2.minEnclosingCircle(c)
-        center_upper_left_frame = (int(x), int(y))
-
-        # Normalize center coordinates to be between -1 and 1
-        center_x_norm = (x - (shape[1] / 2)) / (shape[1] / 2)
-        center_y_norm = (y - (shape[0] / 2)) / (shape[0] / 2)
-
-        print(f"Center: {center_x_norm:.2f}, {center_y_norm:.2f}")
+        x, y = (int(x), int(y))
 
         radius = int(radius)
 
         # Draw the circle and center
-        cv2.circle(img, center_upper_left_frame, radius, (0, 0, 255), 2)
-        cv2.circle(img, center_upper_left_frame, 5, (0, 255, 0), -1)
+        cv2.circle(img, (x, y), radius, (0, 0, 255), 2)
+        cv2.circle(img, (x, y), 5, (0, 255, 0), -1)
 
-        return center_x_norm, center_y_norm, radius
+        return x, y, radius
     else:
         return ValueError("No ball found")
 
@@ -108,7 +102,7 @@ def normalized_coordinates(x, y):
         image_point, camera_matrix, distortion_coefficients
     )
 
-    # normalized coordinates
+    # Undistorted coordinates
     x_norm = undistorted_point[0][0][0]
     y_norm = undistorted_point[0][0][1]
 
@@ -116,7 +110,7 @@ def normalized_coordinates(x, y):
 
 
 def camera_coord(x_norm, y_norm, radius):
-    """Convert normalized coordinates to global coordinates"""
+    """Convert normalized coordinates to camera coordinates"""
 
     if radius > 0:
         real_radius = 20  # mm
@@ -124,6 +118,7 @@ def camera_coord(x_norm, y_norm, radius):
         Z = f * real_radius / radius  # Calculate depth based on radius
         Z = Z / 10  # Convert to cm
 
+        # x_norm and y_norm are already normalized coordinates from undistortPoints
         cam_x = x_norm * Z
         cam_y = y_norm * Z
 
