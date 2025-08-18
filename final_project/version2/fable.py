@@ -162,3 +162,29 @@ class Fable:
         # Transform point to global frame
         p_global = T_world_ee * T_cam_ee * p_cam
         return p_global.t[:3]
+      
+    def error_point_to_prismatic_line(self, point):
+        """
+        Calculate the shortest distance between a 3D point and the line along the prismatic joint
+        (i.e., the line passing through the end-effector and in the direction of the prismatic joint).
+        :param point: (x, y, z) coordinates of the point (in global frame)
+        :return: shortest distance (float)
+        """
+        # Get current end-effector pose (origin of the line)
+        T_ee = self.forwardKinematics([self.angles[0], self.angles[1], 0])
+        p0 = T_ee.t[:3]  # point on the line (end-effector position)
+
+        # Get the direction of the prismatic joint in global frame
+        # The prismatic joint is the third joint, so its axis is the z-axis of the second link's frame
+        # In SE3, the third column of the rotation matrix is the z-axis
+        direction = T_ee.R[:, 2]  # 3x1 vector
+
+        # Vector from line point to the given point
+        v = np.array(point) - p0
+
+        # Compute the perpendicular distance using the cross product
+        distance = np.linalg.norm(np.cross(v, direction)) / np.linalg.norm(direction)
+        return distance
+
+    def error_point_to_middle_frame(self, X, Y):
+        return self.getPositionError([X,Y],[0,0])        
