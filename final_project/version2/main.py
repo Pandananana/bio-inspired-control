@@ -2,10 +2,10 @@ from fable import Fable
 from spatialmath import SE3
 import numpy as np
 
-fable = Fable(connection=True)
+fable = Fable(connection=False)
 
 # Define the target point
-point = SE3.Trans(-20, 20, 0)
+point = SE3.Trans(-25, 20, 10)
 
 # Try to solve inverse kinematics with error handling
 solution = fable.inverseKinematics(point)
@@ -17,6 +17,7 @@ print("Target point:")
 print(point)
 print("Solution (joint angles):")
 print(np.rad2deg(solution[:2]))
+print(solution[2])
 print(f"\nCalculated point from solution:")
 print(calculated_point)
 

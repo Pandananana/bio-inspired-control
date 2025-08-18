@@ -35,8 +35,9 @@ class Fable:
                 rtb.PrismaticDH(a=0, theta=0, alpha=0, qlim=[0, 100]),
             ],
             name="Fable",
-            base=SE3(0, 0, 22) * SE3.RPY(0, -np.deg2rad(90), -np.deg2rad(90)),
+            base=SE3(0, 0, 23) * SE3.RPY(0, -np.deg2rad(90), -np.deg2rad(90)),
         )
+        print(self.robot.n)
 
     def setMotorAngles(self, tau_1, tau_2):
         # Exit if not connected
@@ -54,7 +55,7 @@ class Fable:
         self.setMotorAngles(np.rad2deg(angles[0]), np.rad2deg(angles[1]))
 
     def inverseKinematics(self, point):
-        sol = self.robot.ik_lm_chan(
+        sol = self.robot.ik_gn(
             Tep=point,
             we=[
                 1,
@@ -64,7 +65,6 @@ class Fable:
                 0,
                 0,
             ],  # Only consider position (x,y,z), ignore orientation
-            slimit=10000,
             reject_jl=True,
         )
         if not sol[1]:
