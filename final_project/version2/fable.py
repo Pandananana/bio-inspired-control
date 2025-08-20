@@ -149,12 +149,12 @@ class Fable:
                 camera_x, camera_y, camera_z
             )
             self.ball_history.append((global_x, global_y, global_z))
-            return (global_x, global_y, global_z), (x,y) frame
+            return (global_x, global_y, global_z), (x, y), frame
 
         except Exception as e:
             print(e)
             # print("Ball not found")
-            return None, frame
+            return None, None, frame
 
     def ball_to_camera_coordinates(self, x_norm, y_norm, radius):
         """Convert normalized coordinates to camera coordinates"""
@@ -262,8 +262,8 @@ class Fable:
 
     def error_point_to_middle_frame(self, X, Y):
         # Calculate the Euclidean distance from (X, Y) to (0, 0)
-        return [X - 0,Y - 0]
-    
+        return [X - 0, Y - 0]
+
     def plot_ball_history(self):
         """
         Make a 3D plot of the ball history with temporal coloring
