@@ -5,6 +5,7 @@ from FableAPI.fable_init import api
 from spatialmath import SE3
 from detect_ball import (
     locate,
+    locateV2,
     normalized_coordinates,
     camera_coord,
     distortion_coefficients,
@@ -128,7 +129,7 @@ class Fable:
             if not ret:
                 return None, None
 
-            x, y, r = locate(frame)
+            x, y, r = locateV2(frame, hsv=True)
             x_norm, y_norm = normalized_coordinates(x, y)
             camera_x, camera_y, camera_z = camera_coord(x_norm, y_norm, r)
             global_x, global_y, global_z = self.camera_to_global_coordinates(
@@ -148,7 +149,7 @@ class Fable:
 
         # Extrinsic transform from end-effector to camera
         # Camera is 2cm above the end-effector, 7cm in front of the end-effector
-        T_cam_ee = SE3(2, 0, 7) * SE3.RPY(0, 0, np.deg2rad(90))
+        T_cam_ee = SE3(2, 0, 4.5) * SE3.RPY(0, 0, np.deg2rad(90))
 
         # Point in camera frame (convert from mm to cm)
         p_cam = SE3(X, Y, Z)

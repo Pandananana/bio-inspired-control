@@ -14,6 +14,36 @@ distortion_coefficients = np.array(
 )
 
 
+def create_seg_sliders():
+    """Create segmentation sliders for color detection"""
+
+    def nothing(x):
+        pass
+
+    # Create a window for the sliders
+    cv2.namedWindow("Segmentation Sliders", cv2.WINDOW_NORMAL)
+
+    # Create trackbars for lower and upper HSV bounds
+    cv2.createTrackbar("Lower L", "Segmentation Sliders", 120, 255, nothing)
+    cv2.createTrackbar("Lower A", "Segmentation Sliders", 50, 255, nothing)
+    cv2.createTrackbar("Lower B", "Segmentation Sliders", 50, 255, nothing)
+    cv2.createTrackbar("Upper L", "Segmentation Sliders", 160, 255, nothing)
+    cv2.createTrackbar("Upper A", "Segmentation Sliders", 255, 255, nothing)
+    cv2.createTrackbar("Upper B", "Segmentation Sliders", 255, 255, nothing)
+
+
+def get_seg_values():
+    """Get current segmentation values from sliders"""
+    lower_l = cv2.getTrackbarPos("Lower L", "Segmentation Sliders")
+    lower_a = cv2.getTrackbarPos("Lower A", "Segmentation Sliders")
+    lower_b = cv2.getTrackbarPos("Lower B", "Segmentation Sliders")
+    upper_l = cv2.getTrackbarPos("Upper L", "Segmentation Sliders")
+    upper_a = cv2.getTrackbarPos("Upper A", "Segmentation Sliders")
+    upper_b = cv2.getTrackbarPos("Upper B", "Segmentation Sliders")
+
+    return lower_l, lower_a, lower_b, upper_l, upper_a, upper_b
+
+
 def show_droidcam_feed(url: str):
     """Simple droidcam connection and video display"""
     print("Connecting to droidcam...")
@@ -42,20 +72,24 @@ def show_droidcam_feed(url: str):
         # Resize the frame to fit the window
         # frame = cv2.resize(frame, (640, 360))
 
-        x, y, r = locate(frame)
+        try:
+            x, y, r = locateV2(frame, hsv=True)
+        except ValueError as e:
+            x, y, r = None, None, None
+            print(e)
 
         if x is not None and y is not None and r is not None:
             x_norm, y_norm = normalized_coordinates(x, y)
             global_x, global_y, global_z = camera_coord(x_norm, y_norm, r)
             print(
-                f"Global Coordinates: X={global_x:.2f}, Y={global_y:.2f}, Z={global_z:.2f}"
+                f"Camera Coordinates: X={global_x:.2f}, Y={global_y:.2f}, Z={global_z:.2f}"
             )
 
         # Display the frame
         cv2.imshow("Droidcam Feed", frame)
 
-        # Break loop on 'q' press
-        if cv2.waitKey(1) == ord("q"):
+        key = cv2.waitKey(1)
+        if key == ord("q"):
             break
 
     # Clean up
@@ -89,6 +123,107 @@ def locate(img):
         return x, y, radius
     else:
         return ValueError("No ball found")
+
+
+def locateV2(frame, hsv=False):
+    """
+    Detects a single purple ping pong ball in an image frame.
+
+    Args:
+        frame: Input image frame (BGR format)
+
+    Returns:
+        tuple: (x, y, radius) if ball detected, None if no ball found
+               x, y are center coordinates, radius is the ball radius in pixels
+    """
+    if frame is None or frame.size == 0:
+        raise ValueError("Invalid frame")
+
+    if hsv:
+        # Convert BGR to LAB for perceptual color separation
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+        # Define purple color range in HSV
+        # Purple typically has hue around 120-160, with good saturation and value
+        lower_purple = np.array([120, 50, 50])
+        upper_purple = np.array([160, 255, 255])
+
+        # Create mask for purple colors
+        mask = cv2.inRange(hsv, lower_purple, upper_purple)
+    else:
+        # Convert BGR to LAB for perceptual color separation
+        frame_to_thresh = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)  # LAB
+        mask = cv2.inRange(frame_to_thresh, (63, 141, 76), (255, 255, 127))
+
+    # Morphological operations to clean up the mask
+    # Remove small noise
+    kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10))
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel_open)
+
+    # Fill small holes
+    kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10))
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel_close)
+
+    # Find contours
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    if not contours:
+        raise ValueError("No ball found")
+
+    # Filter contours based on area and circularity
+    valid_contours = []
+    min_area = 100  # Minimum area threshold
+    max_area = 100000  # Maximum area threshold
+
+    for contour in contours:
+        area = cv2.contourArea(contour)
+
+        # Skip if area is too small or too large
+        if area < min_area or area > max_area:
+            continue
+
+        # Calculate circularity to ensure it's round
+        perimeter = cv2.arcLength(contour, True)
+        if perimeter == 0:
+            continue
+
+        circularity = 4 * np.pi * area / (perimeter * perimeter)
+
+        # Ping pong balls should be fairly circular (circularity close to 1)
+        if circularity > 0.5:  # Adjust threshold as needed
+            valid_contours.append((contour, area))
+
+    if not valid_contours:
+        raise ValueError("No ball found")
+
+    # Sort by area and take the largest valid contour
+    # This helps when multiple purple objects are present
+    valid_contours.sort(key=lambda x: x[1], reverse=True)
+    best_contour = valid_contours[0][0]
+
+    # Fit minimum enclosing circle for accurate center and radius
+    (x, y), radius = cv2.minEnclosingCircle(best_contour)
+
+    # Additional validation: check if the fitted circle makes sense
+    if radius < 10 or radius > 300:  # Reasonable radius bounds for ping pong ball
+        raise ValueError("Invalid radius")
+
+    # Calculate the ratio of contour area to circle area for final validation
+    contour_area = cv2.contourArea(best_contour)
+    circle_area = np.pi * radius * radius
+    area_ratio = contour_area / circle_area
+
+    # A ping pong ball should fill most of its enclosing circle
+    if area_ratio < 0.6:  # Adjust threshold as needed
+        raise ValueError("Invalid area ratio")
+
+    # Draw circle around detected ball
+    cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 0), 2)
+
+    # Draw center point
+    cv2.circle(frame, (int(x), int(y)), 3, (0, 0, 255), -1)
+
+    return (int(x), int(y), int(radius))
 
 
 def normalized_coordinates(x, y):
@@ -128,4 +263,4 @@ def camera_coord(x_norm, y_norm, radius):
 
 
 if __name__ == "__main__":
-    show_droidcam_feed(1)
+    show_droidcam_feed(0)
