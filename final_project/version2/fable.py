@@ -12,6 +12,7 @@ from detect_ball import (
     camera_matrix,
 )
 import cv2
+import matplotlib.pyplot as plt
 
 
 class Fable:
@@ -56,6 +57,10 @@ class Fable:
             base=SE3(0, 0, 23) * SE3.RPY(0, -np.deg2rad(90), -np.deg2rad(90)),
         )
 
+        ## Storage
+        self.ball_history = []
+        self.angle_history = []
+
     def setMotorAngles(self, tau_1, tau_2):
         # Exit if not connected
         if not self.robot_connected:
@@ -87,7 +92,7 @@ class Fable:
 
     def inverseKinematics(self, point):
         sol = self.robot.ik_gn(
-            q0=self.angles, # Initial guess is the current angles
+            q0=self.angles,  # Initial guess is the current angles
             Tep=point,
             we=[
                 1,
@@ -101,6 +106,7 @@ class Fable:
         )
         if not sol[1]:
             print("No solution found")
+        self.angle_history.append(sol[0])
         return sol[0]
 
     def forwardKinematics(self, angles):
@@ -136,6 +142,7 @@ class Fable:
             global_x, global_y, global_z = self.camera_to_global_coordinates(
                 camera_x, camera_y, camera_z
             )
+            self.ball_history.append((global_x, global_y, global_z))
             return (global_x, global_y, global_z), frame
 
         except Exception:
@@ -191,3 +198,33 @@ class Fable:
     def error_point_to_middle_frame(self, X, Y):
         # Calculate the Euclidean distance from (X, Y) to (0, 0)
         return np.sqrt((X - 0) ** 2 + (Y - 0) ** 2)
+
+    def plot_ball_history(self):
+        """
+        Make a 3D plot of the ball history
+        """
+        # Get the ball history
+        ball_history = self.ball_history
+
+        # Convert list of tuples to numpy array for indexing
+        if ball_history:
+            ball_history_array = np.array(ball_history)
+
+            # Plot the ball history
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection="3d")
+            ax.scatter(
+                ball_history_array[:, 0],
+                ball_history_array[:, 1],
+                ball_history_array[:, 2],
+            )
+
+            # Set labels and title
+            ax.set_xlabel("X")
+            ax.set_ylabel("Y")
+            ax.set_zlabel("Z")
+            ax.set_title("Ball Position History")
+
+            plt.show()
+        else:
+            print("No ball history to plot")
