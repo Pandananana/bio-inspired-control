@@ -225,6 +225,30 @@ class Fable:
             ax.set_zlabel("Z")
             ax.set_title("Ball Position History")
 
+            # Get the current data ranges
+            x_range = ball_history_array[:, 0].max() - ball_history_array[:, 0].min()
+            y_range = ball_history_array[:, 1].max() - ball_history_array[:, 1].min()
+            z_range = ball_history_array[:, 2].max() - ball_history_array[:, 2].min()
+
+            # Find the maximum range to make all axes equal
+            max_range = max(x_range, y_range, z_range)
+
+            # Calculate centers for each axis
+            x_center = (
+                ball_history_array[:, 0].max() + ball_history_array[:, 0].min()
+            ) / 2
+            y_center = (
+                ball_history_array[:, 1].max() + ball_history_array[:, 1].min()
+            ) / 2
+            z_center = (
+                ball_history_array[:, 2].max() + ball_history_array[:, 2].min()
+            ) / 2
+
+            # Set equal limits for all axes
+            ax.set_xlim(x_center - max_range / 2, x_center + max_range / 2)
+            ax.set_ylim(y_center - max_range / 2, y_center + max_range / 2)
+            ax.set_zlim(z_center - max_range / 2, z_center + max_range / 2)
+
             plt.show()
         else:
             print("No ball history to plot")
