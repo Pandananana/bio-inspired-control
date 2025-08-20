@@ -44,60 +44,6 @@ def get_seg_values():
     return lower_l, lower_a, lower_b, upper_l, upper_a, upper_b
 
 
-def show_droidcam_feed(url: str):
-    """Simple droidcam connection and video display"""
-    print("Connecting to droidcam...")
-
-    # Open video capture
-    cap = cv2.VideoCapture(url)
-
-    if not cap.isOpened():
-        print("Cannot open droidcam connection")
-        print(
-            "Make sure droidcam is running on your phone and the IP address is correct"
-        )
-        return
-
-    print("Connected! Press 'q' to quit")
-
-    while True:
-        # Read frame
-        ret, frame = cap.read()
-
-        if not ret:
-            print("Can't receive frame")
-            break
-
-        # Original shape (1280, 720, 3)
-        # Resize the frame to fit the window
-        # frame = cv2.resize(frame, (640, 360))
-
-        try:
-            x, y, r = locateV2(frame, hsv=True)
-        except ValueError as e:
-            x, y, r = None, None, None
-            print(e)
-
-        if x is not None and y is not None and r is not None:
-            x_norm, y_norm = normalized_coordinates(x, y)
-            global_x, global_y, global_z = camera_coord(x_norm, y_norm, r)
-            print(
-                f"Camera Coordinates: X={global_x:.2f}, Y={global_y:.2f}, Z={global_z:.2f}"
-            )
-
-        # Display the frame
-        cv2.imshow("Droidcam Feed", frame)
-
-        key = cv2.waitKey(1)
-        if key == ord("q"):
-            break
-
-    # Clean up
-    cap.release()
-    cv2.destroyAllWindows()
-    print("Disconnected")
-
-
 def locate(img):
     frame_to_thresh = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)  # LAB
     thresh = cv2.inRange(frame_to_thresh, (63, 141, 76), (255, 255, 127))
@@ -242,7 +188,3 @@ def normalized_coordinates(x, y):
     y_norm = undistorted_point[0][0][1]
 
     return x_norm, y_norm
-
-
-if __name__ == "__main__":
-    show_droidcam_feed(0)

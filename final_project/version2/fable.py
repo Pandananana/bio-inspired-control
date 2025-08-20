@@ -33,7 +33,7 @@ class Fable:
                 print("Cannot open camera")
                 exit()
         ## IKPY
-        self.robot_ikpy = Chain.from_urdf_file(
+        self.robot = Chain.from_urdf_file(
             "fable.urdf", active_links_mask=[False, True, True, True]
         )
 
@@ -78,14 +78,14 @@ class Fable:
         self.setMotorAngles(np.rad2deg(angles[0]), np.rad2deg(angles[1]))
 
     def inverseKinematics(self, point):
-        sol = self.robot_ikpy.inverse_kinematics(point, initial_position=[0, 0, 0, 5])
+        sol = self.robot.inverse_kinematics(point, initial_position=[0, 0, 0, 5])
         sol = sol[1:]
         self.angle_history.append(sol)
         return sol
 
     def forwardKinematics(self, angles):
         angles = [0, angles[0], angles[1], angles[2]]
-        homotrans = self.robot_ikpy.forward_kinematics(angles)
+        homotrans = self.robot.forward_kinematics(angles)
         return SE3(homotrans)
 
     def getBattery(self):

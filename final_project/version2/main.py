@@ -10,11 +10,6 @@ from adaptive_filter.cerebellum import AdaptiveFilterCerebellum
 fable = Fable(robot_connected=True, camera_connected=True, camera_index=0)
 
 while True:
-    # fable.getMotorAngles()
-    # position = fable.forwardKinematics([fable.angles[0], fable.angles[1], 10])
-    # print(position)
-    # time.sleep(0.1)
-
     coords, frame_coords, frame = fable.detectBall()
 
     if coords and frame_coords:
@@ -45,7 +40,7 @@ while True:
 
 #     if coords and frame_coords:
 #         print(f"X: {coords[0]:.2f}, Y: {coords[1]:.2f}, Z: {coords[2]:.2f}")
-#         fable.setLaserPosition([(coords[0] + C[0], coords[1] + C[1], coords[2] + C[2])])
+#         fable.setLaserPosition([coords[0] + C[0], coords[1] + C[1], coords[2] + C[2]])
 
 #         # Learn the adaptive filter cerebellum
 #         x = np.array([fable.angles[0], fable.angles[1]])
