@@ -1,8 +1,6 @@
 import time
-import roboticstoolbox as rtb
 import numpy as np
 from FableAPI.fable_init import api
-from spatialmath import SE3
 from detect_ball import (
     locateV2,
     normalized_coordinates,
@@ -10,6 +8,8 @@ from detect_ball import (
 )
 import cv2
 import matplotlib.pyplot as plt
+from ikpy.chain import Chain
+from spatialmath import SE3
 
 
 class Fable:
@@ -32,26 +32,9 @@ class Fable:
             if not self.camera.isOpened():
                 print("Cannot open camera")
                 exit()
-
-        ## Robotics Toolbox
-        self.robot = rtb.DHRobot(
-            [
-                rtb.RevoluteDH(
-                    d=0,
-                    a=5,
-                    alpha=np.deg2rad(90),
-                    qlim=[np.deg2rad(-90), np.deg2rad(90)],
-                ),
-                rtb.RevoluteDH(
-                    d=0,
-                    a=8.5,  # 9.5,
-                    alpha=np.deg2rad(-90),
-                    qlim=[np.deg2rad(-90), np.deg2rad(90)],
-                ),
-                rtb.PrismaticDH(a=0, theta=0, alpha=0, qlim=[0, 100]),
-            ],
-            name="Fable",
-            base=SE3(0, 0, 23) * SE3.RPY(0, -np.deg2rad(90), -np.deg2rad(90)),
+        ## IKPY
+        self.robot_ikpy = Chain.from_urdf_file(
+            "fable.urdf", active_links_mask=[False, True, True, True]
         )
 
         ## Storage
@@ -76,7 +59,7 @@ class Fable:
         while api.getMoving(0, self.module) or api.getMoving(1, self.module):
             time.sleep(0.01)  # Small delay to avoid busy waiting
 
-        self.angles = self.getMotorAngles()
+        self.getMotorAngles()
 
     def getMotorAngles(self):
         # Exit if not connected
@@ -95,26 +78,15 @@ class Fable:
         self.setMotorAngles(np.rad2deg(angles[0]), np.rad2deg(angles[1]))
 
     def inverseKinematics(self, point):
-        sol = self.robot.ik_gn(
-            q0=self.angles,  # Initial guess is the current angles
-            Tep=point,
-            we=[
-                1,
-                1,
-                1,
-                0,
-                0,
-                0,
-            ],  # Only consider position (x,y,z), ignore orientation
-            reject_jl=True,
-        )
-        if not sol[1]:
-            print("No solution found")
-        self.angle_history.append(sol[0])
-        return sol[0]
+        sol = self.robot_ikpy.inverse_kinematics(point, initial_position=[0, 0, 0, 5])
+        sol = sol[1:]
+        self.angle_history.append(sol)
+        return sol
 
     def forwardKinematics(self, angles):
-        return self.robot.fkine(angles)
+        angles = [0, angles[0], angles[1], angles[2]]
+        homotrans = self.robot_ikpy.forward_kinematics(angles)
+        return SE3(homotrans)
 
     def getBattery(self):
         if not self.robot_connected:
@@ -222,7 +194,7 @@ class Fable:
 
         # Extrinsic transform from end-effector to camera
         # Camera is 2cm above the end-effector, 7cm in front of the end-effector
-        T_cam_ee = SE3(2, 0, 4.5) * SE3.RPY(0, 0, np.deg2rad(90))
+        T_cam_ee = SE3(2, 0, 4.5) * SE3.RPY(0, 0, np.deg2rad(180))
 
         # Point in camera frame (convert from mm to cm)
         p_cam = SE3(X, Y, Z)
