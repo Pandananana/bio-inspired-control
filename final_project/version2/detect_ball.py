@@ -201,29 +201,26 @@ def locateV2(frame, hsv=False):
     valid_contours.sort(key=lambda x: x[1], reverse=True)
     best_contour = valid_contours[0][0]
 
-    # Fit minimum enclosing circle for accurate center and radius
-    (x, y), radius = cv2.minEnclosingCircle(best_contour)
+    # Fit ellipse to contour
+    if len(best_contour) < 5:  # fitEllipse needs at least 5 points
+        raise ValueError("Contour too small for ellipse fit")
 
-    # Additional validation: check if the fitted circle makes sense
-    if radius < 10 or radius > 300:  # Reasonable radius bounds for ping pong ball
-        raise ValueError("Invalid radius")
+    ellipse = cv2.fitEllipse(best_contour)
+    (x, y), (major_axis, minor_axis), angle = ellipse
 
-    # Calculate the ratio of contour area to circle area for final validation
-    contour_area = cv2.contourArea(best_contour)
-    circle_area = np.pi * radius * radius
-    area_ratio = contour_area / circle_area
+    # Use the minor axis as the "apparent diameter" (more stable than circle)
+    radius = minor_axis / 2.0
 
-    # A ping pong ball should fill most of its enclosing circle
-    if area_ratio < 0.6:  # Adjust threshold as needed
-        raise ValueError("Invalid area ratio")
+    # Sanity check
+    if radius < 10 or radius > 300:
+        raise ValueError("Invalid radius from ellipse")
 
-    # Draw circle around detected ball
-    cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 0), 2)
-
-    # Draw center point
+    # Draw the ellipse
+    cv2.ellipse(frame, ellipse, (0, 255, 0), 2)
     cv2.circle(frame, (int(x), int(y)), 3, (0, 0, 255), -1)
 
-    return (int(x), int(y), int(radius))
+    return int(x), int(y), int(radius)
+
 
 
 def normalized_coordinates(x, y):
