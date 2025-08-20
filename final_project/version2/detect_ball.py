@@ -244,23 +244,5 @@ def normalized_coordinates(x, y):
     return x_norm, y_norm
 
 
-def camera_coord(x_norm, y_norm, radius):
-    """Convert normalized coordinates to camera coordinates"""
-
-    if radius > 0:
-        real_radius = 20  # mm
-        f = camera_matrix[0, 0]  # Focal length from camera matrix
-        Z = f * real_radius / radius  # Calculate depth based on radius
-        Z = Z / 10  # Convert to cm
-
-        # x_norm and y_norm are already normalized coordinates from undistortPoints
-        cam_x = x_norm * Z
-        cam_y = y_norm * Z
-
-        return cam_x, cam_y, Z
-    else:
-        raise ValueError("Invalid radius: must be greater than 0")
-
-
 if __name__ == "__main__":
     show_droidcam_feed(0)

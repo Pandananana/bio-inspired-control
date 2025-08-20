@@ -4,11 +4,8 @@ import numpy as np
 from FableAPI.fable_init import api
 from spatialmath import SE3
 from detect_ball import (
-    locate,
     locateV2,
     normalized_coordinates,
-    camera_coord,
-    distortion_coefficients,
     camera_matrix,
 )
 import cv2
@@ -60,6 +57,10 @@ class Fable:
         ## Storage
         self.ball_history = []
         self.angle_history = []
+
+        # Add filter for Z values
+        self.z_history = []
+        self.z_filter_size = 30  # Number of previous values to average
 
     def setMotorAngles(self, tau_1, tau_2):
         # Exit if not connected
@@ -138,16 +139,44 @@ class Fable:
 
             x, y, r = locateV2(frame, hsv=True)
             x_norm, y_norm = normalized_coordinates(x, y)
-            camera_x, camera_y, camera_z = camera_coord(x_norm, y_norm, r)
+            camera_x, camera_y, camera_z = self.ball_to_camera_coordinates(
+                x_norm, y_norm, r
+            )
             global_x, global_y, global_z = self.camera_to_global_coordinates(
                 camera_x, camera_y, camera_z
             )
             self.ball_history.append((global_x, global_y, global_z))
             return (global_x, global_y, global_z), frame
 
-        except Exception:
-            print("Ball not found")
+        except Exception as e:
+            print(e)
+            # print("Ball not found")
             return None, frame
+
+    def ball_to_camera_coordinates(self, x_norm, y_norm, radius):
+        """Convert normalized coordinates to camera coordinates"""
+
+        if radius > 0:
+            real_radius = 20  # mm
+            f = camera_matrix[0, 0]  # Focal length from camera matrix
+            Z = f * real_radius / radius  # Calculate depth based on radius
+            Z = Z / 10  # Convert to cm
+
+            # Apply moving average filter to Z
+            self.z_history.append(Z)
+            if len(self.z_history) > self.z_filter_size:
+                self.z_history.pop(0)  # Remove oldest value
+
+            # Calculate filtered Z
+            Z_filtered = sum(self.z_history) / len(self.z_history)
+
+            # x_norm and y_norm are already normalized coordinates from undistortPoints
+            cam_x = x_norm * Z_filtered
+            cam_y = y_norm * Z_filtered
+
+            return cam_x, cam_y, Z_filtered
+        else:
+            raise ValueError("Invalid radius: must be greater than 0")
 
     def camera_to_global_coordinates(self, X, Y, Z):
         """
