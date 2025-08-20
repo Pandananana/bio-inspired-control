@@ -60,7 +60,10 @@ class Fable:
 
         # Add filter for Z values
         self.z_history = []
-        self.z_filter_size = 30  # Number of previous values to average
+        self.z_filter_size = (
+            10  # Number of previous values to keep for outlier detection
+        )
+        self.z_outlier_threshold = 2.0  # Standard deviations for outlier detection
 
     def setMotorAngles(self, tau_1, tau_2):
         # Exit if not connected
@@ -162,13 +165,8 @@ class Fable:
             Z = f * real_radius / radius  # Calculate depth based on radius
             Z = Z / 10  # Convert to cm
 
-            # Apply moving average filter to Z
-            self.z_history.append(Z)
-            if len(self.z_history) > self.z_filter_size:
-                self.z_history.pop(0)  # Remove oldest value
-
-            # Calculate filtered Z
-            Z_filtered = sum(self.z_history) / len(self.z_history)
+            # Apply outlier detection and filtering to Z
+            Z_filtered = self._filter_z_outlier(Z)
 
             # x_norm and y_norm are already normalized coordinates from undistortPoints
             cam_x = x_norm * Z_filtered
@@ -177,6 +175,44 @@ class Fable:
             return cam_x, cam_y, Z_filtered
         else:
             raise ValueError("Invalid radius: must be greater than 0")
+
+    def _filter_z_outlier(self, new_z):
+        """Filter out outliers using statistical methods"""
+        if len(self.z_history) == 0:
+            # First measurement, just add it
+            self.z_history.append(new_z)
+            return new_z
+
+        # Add new measurement
+        self.z_history.append(new_z)
+
+        # Keep only the last N measurements
+        if len(self.z_history) > self.z_filter_size:
+            self.z_history.pop(0)
+
+        # Calculate statistics
+        z_array = np.array(self.z_history)
+        z_mean = np.mean(z_array)
+        z_std = np.std(z_array)
+
+        # Check if new value is an outlier
+        if z_std > 0:  # Avoid division by zero
+            z_score = abs(new_z - z_mean) / z_std
+
+            if z_score > self.z_outlier_threshold:
+                # Value is an outlier, use median of recent values instead
+                z_filtered = np.median(z_array[:-1])  # Exclude the outlier
+                print(
+                    f"Z outlier detected: {new_z:.2f} (z-score: {z_score:.2f}), using filtered value: {z_filtered:.2f}"
+                )
+            else:
+                # Value is not an outlier, use it
+                z_filtered = new_z
+        else:
+            # No variation in data, use new value
+            z_filtered = new_z
+
+        return z_filtered
 
     def camera_to_global_coordinates(self, X, Y, Z):
         """
