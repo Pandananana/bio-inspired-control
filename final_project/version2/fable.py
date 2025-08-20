@@ -87,6 +87,7 @@ class Fable:
 
     def inverseKinematics(self, point):
         sol = self.robot.ik_gn(
+            q0=self.angles, # Initial guess is the current angles
             Tep=point,
             we=[
                 1,

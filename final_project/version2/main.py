@@ -4,7 +4,7 @@ import numpy as np
 import time
 import cv2
 
-fable = Fable(robot_connected=True, camera_connected=True, camera_index=0)
+fable = Fable(robot_connected=True, camera_connected=True, camera_index=1)
 
 while True:
     coords, frame = fable.detectBall()
