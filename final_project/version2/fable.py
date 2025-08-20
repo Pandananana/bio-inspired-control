@@ -201,7 +201,7 @@ class Fable:
 
     def plot_ball_history(self):
         """
-        Make a 3D plot of the ball history
+        Make a 3D plot of the ball history with temporal coloring
         """
         # Get the ball history
         ball_history = self.ball_history
@@ -209,21 +209,44 @@ class Fable:
         # Convert list of tuples to numpy array for indexing
         if ball_history:
             ball_history_array = np.array(ball_history)
+            num_points = len(ball_history_array)
 
             # Plot the ball history
             fig = plt.figure()
             ax = fig.add_subplot(111, projection="3d")
+
+            # Create color gradient from blue (early) to red (late)
+            colors = plt.cm.coolwarm(np.linspace(0, 1, num_points))
+
+            # Plot all points except the last one with temporal coloring
+            if num_points > 1:
+                ax.scatter(
+                    ball_history_array[:-1, 0],
+                    ball_history_array[:-1, 1],
+                    ball_history_array[:-1, 2],
+                    c=colors[:-1],
+                    s=50,  # size of regular points
+                    alpha=0.7,
+                )
+
+            # Plot the last point with different marker and size to make it stand out
             ax.scatter(
-                ball_history_array[:, 0],
-                ball_history_array[:, 1],
-                ball_history_array[:, 2],
+                ball_history_array[-1, 0],
+                ball_history_array[-1, 1],
+                ball_history_array[-1, 2],
+                c="red",
+                s=200,  # larger size
+                marker="*",  # star marker
+                edgecolors="black",
+                linewidth=2,
+                alpha=1.0,
             )
 
             # Set labels and title
             ax.set_xlabel("X")
             ax.set_ylabel("Y")
             ax.set_zlabel("Z")
-            ax.set_title("Ball Position History")
+            ax.set_title("Ball Position History (Temporal Progression)")
 
             # Get the current data ranges
             x_range = ball_history_array[:, 0].max() - ball_history_array[:, 0].min()
@@ -248,6 +271,14 @@ class Fable:
             ax.set_xlim(x_center - max_range / 2, x_center + max_range / 2)
             ax.set_ylim(y_center - max_range / 2, y_center + max_range / 2)
             ax.set_zlim(z_center - max_range / 2, z_center + max_range / 2)
+
+            # Add a colorbar to show temporal progression
+            sm = plt.cm.ScalarMappable(
+                cmap=plt.cm.coolwarm, norm=plt.Normalize(0, num_points - 1)
+            )
+            sm.set_array([])
+            cbar = plt.colorbar(sm, ax=ax, shrink=0.5, aspect=20)
+            cbar.set_label("Time Step")
 
             plt.show()
         else:
