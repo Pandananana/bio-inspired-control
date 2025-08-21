@@ -1,4 +1,4 @@
-import time
+import subprocess
 import numpy as np
 from FableAPI.fable_init import api
 from detect_ball import (
@@ -127,7 +127,7 @@ class Fable:
                 camera_x, camera_y, camera_z
             )
             self.ball_history.append((global_x, global_y, global_z))
-            return (global_x, global_y, global_z), (x, y), frame
+            return (global_x, global_y, global_z), (x_norm, y_norm), frame
 
         except Exception as e:
             print(e)
@@ -215,63 +215,67 @@ class Fable:
         p_global = T_world_ee * T_cam_ee * p_cam
         return p_global.t[:3]
 
-    def error_point_to_prismatic_line(self, point):
+    def error_point_to_middle_frame(self, X, Y):
         """
-        Calculate the shortest distance between a 3D point and the line along the prismatic joint
-        (i.e., the line passing through the end-effector and in the direction of the prismatic joint).
-        :param point: (x, y, z) coordinates of the point (in global frame)
-        :return: shortest distance (float)
+        Calculate the distance from (X, Y) to (0, 0)
         """
-        # Get current end-effector pose (origin of the line)
-        T_ee = self.forwardKinematics([self.angles[0], self.angles[1], 0])
-        p0 = T_ee.t[:3]  # point on the line (end-effector position)
+        return np.linalg.norm([X, Y])
 
-        # Get the direction of the prismatic joint in global frame
-        # The prismatic joint is the third joint, so its axis is the z-axis of the second link's frame
-        # In SE3, the third column of the rotation matrix is the z-axis
-        direction = T_ee.R[:, 2]  # 3x1 vector
-
-        # Vector from line point to the given point
-        v = np.array(point) - p0
-
-        # Compute the perpendicular distance using the cross product
-        distance = np.linalg.norm(np.cross(v, direction)) / np.linalg.norm(direction)
-        return distance
-
-    def plot_velocity_history(self):
+    def plot_error_velocity_history(self, error):
         """
-        Plot the velocity history of the ball in 3D space
+        Plot the error and velocity history of the ball in 3D space
         """
         if not self.ball_history or len(self.ball_history) < 2:
             print("No velocity to plot")
             return
 
+        if error is None:
+            print("No error to plot")
+            return
+
         # Convert list of tuples to numpy array for indexing
         ball_history_array = np.array(self.ball_history)
 
-        # Calculate velocities
-        velocities = np.zeros_like(ball_history_array)
-        velocities[0] = np.diff(ball_history_array, axis=0)
-        velocities[1] = np.diff(ball_history_array, axis=1)
-        velocities[2] = np.diff(ball_history_array, axis=2)
+        # Calculate velocities using np.diff (this reduces size by 1)
+        velocities = np.diff(ball_history_array, axis=0)  # Shape: (n-1, 3)
 
         # Create 3 Plots
         fig, axs = plt.subplots(3, 1, figsize=(10, 15), sharex=True)
+
+        # Plot X velocity
         axs[0].plot(velocities[:, 0], label="Velocity X")
+        axs[0].plot(error[:], label="Error", color="red")
         axs[0].set_ylabel("Velocity X (cm/s)")
         axs[0].set_title("Velocity in X Direction Over Time")
         axs[0].legend()
+
+        # Plot Y velocity
         axs[1].plot(velocities[:, 1], label="Velocity Y", color="orange")
+        axs[1].plot(error[:], label="Error", color="red")
         axs[1].set_ylabel("Velocity Y (cm/s)")
         axs[1].set_title("Velocity in Y Direction Over Time")
         axs[1].legend()
+
+        # Plot Z velocity
         axs[2].plot(velocities[:, 2], label="Velocity Z", color="green")
+        axs[2].plot(error[:], label="Error", color="red")
         axs[2].set_ylabel("Velocity Z (cm/s)")
         axs[2].set_xlabel("Time Step")
         axs[2].set_title("Velocity in Z Direction Over Time")
         axs[2].legend()
+
         plt.tight_layout()
         plt.show()
+
+        # Get current git commit hash
+        commit_hash = (
+            subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
+            .decode("utf-8")
+            .strip()
+        )
+
+        # Save the plot in folder plots with commit hash in filename
+        plt.savefig(f"plots/error_history_{commit_hash}.png")
 
     def plot_ball_history(self):
         """
