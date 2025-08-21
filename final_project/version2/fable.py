@@ -53,7 +53,11 @@ class Fable:
 
         ## CMAC
         self.cmac = CMAC(
-            n_rfs=5, xmin=[-100, -100, -100], xmax=[100, 100, 100], n_outputs=2
+            n_rfs=5,
+            xmin=[-100, -100, -100],
+            xmax=[100, 100, 100],
+            n_outputs=2,
+            load_weights=True,
         )
 
     def setMotorAngles(self, tau_1, tau_2):
@@ -86,18 +90,21 @@ class Fable:
         # Convert position to angles
         angles = self.inverseKinematics(position)
 
+        # Add CMAC prediction to angles
+        cmac_prediction = self.cmac.predict([position[0], position[1]])
+
         # Set the motor angles
         if add_CMAC:
-            # Add CMAC prediction to angles
-            cmac_prediction = self.cmac.predict(position[0], position[1])
-
-            angles[0] += cmac_prediction[0]
-            angles[1] += cmac_prediction[1]
+            # angles[0] += cmac_prediction[0]
+            # angles[1] += cmac_prediction[1]
+            print(f"Angles: {angles}")
+            print(f"CMAC prediction: {cmac_prediction}")
 
         # Limit the angles to the range [-pi, pi]
-        angles[0] = np.clip(angles[0], -np.pi, np.pi)
-        angles[1] = np.clip(angles[1], -np.pi, np.pi)
+        # angles[0] = np.clip(angles[0], -np.pi, np.pi)
+        # angles[1] = np.clip(angles[1], -np.pi, np.pi)
 
+        self.angle_history.append(angles)
         self.setMotorAngles(np.rad2deg(angles[0]), np.rad2deg(angles[1]))
 
     def inverseKinematics(self, point):
@@ -123,7 +130,6 @@ class Fable:
             ],
         )
         sol = sol[1:]
-        self.angle_history.append(sol)
         return sol
 
     def forwardKinematics(self, angles):

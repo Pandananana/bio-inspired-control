@@ -125,5 +125,5 @@ if __name__ == "__main__":
     # Plot the weight history
     cmac.plot_weight_history()
 
-    #Save weights to a file
+    # Save weights to a file
     np.save("weights/cmac_weights.npy", cmac.w)
