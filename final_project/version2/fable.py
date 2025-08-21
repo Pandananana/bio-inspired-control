@@ -56,6 +56,9 @@ class Fable:
         api.setPos(tau_1, tau_2, self.module)
 
     def getMotorAngles(self):
+        """
+        Get the current motor angles in radians
+        """
         # Exit if not connected
         if not self.robot_connected:
             return None
@@ -72,6 +75,11 @@ class Fable:
         self.setMotorAngles(np.rad2deg(angles[0]), np.rad2deg(angles[1]))
 
     def inverseKinematics(self, point):
+        """
+        Returns the angles in radians and length of prismatic joint in cm
+        [angle0, angle1, length]
+        """
+
         # Use the previous angles as the initial position
         if len(self.angle_history) == 0:
             previous_angles = [0, 0, 0, 0]
@@ -139,6 +147,25 @@ class Fable:
         # Transform point to global frame
         p_global = T_world_ee * T_cam_ee * p_cam
         return p_global.t[:3]
+
+    def positional_error(self, target_position):
+        current_angles = self.getMotorAngles()
+        current_position = self.forwardKinematics(
+            [current_angles[0], current_angles[1], 0]
+        )
+
+    def angle_error(self, target_position):
+        """
+        Calculate difference between the robots current
+        angles and the angles necessary to hit the target position
+        Returns [error_angle1, error_angle2]
+        """
+        current_angles = self.getMotorAngles()
+        target_angles = self.inverseKinematics(target_position)[:2]
+        return [
+            target_angles[0] - current_angles[0],
+            target_angles[1] - current_angles[1],
+        ]
 
     def getBattery(self):
         if not self.robot_connected:
