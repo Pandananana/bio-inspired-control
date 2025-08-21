@@ -96,7 +96,6 @@ def locateV2(frame, hsv=False):
 
         # Create mask for purple colors
         mask = cv2.inRange(hsv, lower_purple, upper_purple)
-        cv2.imshow("Mask", mask)
     else:
         # Convert BGR to LAB for perceptual color separation
         frame_to_thresh = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)  # LAB

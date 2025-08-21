@@ -29,30 +29,42 @@ fable = Fable(robot_connected=True, camera_connected=True, camera_index=0)
 
 
 ## Lucas's code
-n_rfs = 7
-xmin = [-200, -200, -200]
-xmax = [200, 200, 200]
+enable_cmac = True
+weighting_factor = 0.2
+n_rfs = 10
+lim = 100
+
+xmin = [-lim, -lim, -lim]
+xmax = [lim, lim, lim]
 cmac = CMAC3D(n_rfs, xmin, xmax, beta=1e-2)
-cmac.w = np.load("weights/lucas_weights.npy")
+
+try:
+    cmac.w = np.load(f"weights/lucas_wf{weighting_factor}_nrf{n_rfs}_lim{lim}.npy")
+except:
+    print("No weights found")
 
 while True:
     coords, frame_coords, frame = fable.detectBall()
 
     if coords and frame_coords:
-        vel = fable.calculate_velocities()
-        error = fable.positional_error(coords)
-        if vel is not None and error is not None:
-            new_pos = cmac.cmac_function(vel, error)
-            delta_pos = (new_pos - coords) * 0.1
-            position = coords + delta_pos
-            fable.setLaserPosition(
-                [position[0], position[1], position[2]], add_CMAC=False
-            )
+
+        if enable_cmac:
+            vel = fable.calculate_velocities()
+            error = fable.positional_error(coords)
+            if vel is not None and error is not None:
+                new_pos = cmac.cmac_function(vel, error)
+                delta_pos = (new_pos - coords) * weighting_factor
+                position = coords + delta_pos
+                fable.setLaserPosition(
+                    [position[0], position[1], position[2]], add_CMAC=False
+                )
+        else:
+            fable.setLaserPosition([coords[0], coords[1], coords[2]], add_CMAC=False)
 
     fable.showFrame(frame)
-    if cv2.waitKey(1) & 0xFF == ord("q"):
-        break
 
-# Save weights to a file
-np.save("weights/lucas_weights.npy", cmac.w)
-cmac.plot_weight_history()
+    # Close and save weights
+    if cv2.waitKey(1) & 0xFF == ord("q"):
+        np.save(f"weights/lucas_wf{weighting_factor}_nrf{n_rfs}_lim{lim}.npy", cmac.w)
+        cmac.plot_weight_history()
+        break
