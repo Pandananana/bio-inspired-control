@@ -78,7 +78,22 @@ class Fable:
         self.setMotorAngles(np.rad2deg(angles[0]), np.rad2deg(angles[1]))
 
     def inverseKinematics(self, point):
-        sol = self.robot.inverse_kinematics(point, initial_position=[0, 0, 0, 5])
+        # Use the previous angles as the initial position
+        if len(self.angle_history) == 0:
+            previous_angles = [0, 0, 0, 0]
+        else:
+            previous_angles = self.angle_history[-1]
+
+        # Inverse kinematics
+        sol = self.robot.inverse_kinematics(
+            point,
+            initial_position=[
+                0,
+                previous_angles[0],
+                previous_angles[1],
+                previous_angles[2],
+            ],
+        )
         sol = sol[1:]
         self.angle_history.append(sol)
         return sol
@@ -92,9 +107,6 @@ class Fable:
         if not self.robot_connected:
             return None
         return self.api.getBattery(self.module)
-
-    def getPositionError(self, point1, point2):
-        return np.linalg.norm(point1.t[:3] - point2.t[:3])
 
     def showFrame(self, frame):
         if not self.camera_connected or frame is None:
