@@ -50,18 +50,19 @@ class CMAC3D:
         self.learn(error)
         return new_pos
 
-# Example usage
-if __name__ == '__main__':
-    n_rfs = 7
-    xmin = [-1, -1, -1]
-    xmax = [1, 1, 1]
-    cmac = CMAC3D(n_rfs, xmin, xmax, beta=1e-2)
+# # Example usage
+# if __name__ == '__main__':
+#     n_rfs = 7
+#     xmin = [-1, -1, -1]
+#     xmax = [1, 1, 1]
+#     cmac = CMAC3D(n_rfs, xmin, xmax, beta=1e-2)
+#     cmac.w = np.load("/Users/lucasorellana/Documents/stuff/DTU/4_semester/bioinspired/bio-inspired-control/final_project/version2/weights/test_weights.npy")
 
-    vel = np.array([0.1, -0.2, 0.05])
-    pos_actual = np.array([0.5, 0.5, 0.5])
-    pos_correct = np.array([0.6, 0.4, 0.55])
+#     vel = np.array([0.1, -0.2, 0.05])
+#     pos_actual = np.array([0.5, 0.5, 0.5])
+#     pos_correct = np.array([0.6, 0.4, 0.55])
 
-    new_pos = cmac.cmac_function(vel, pos_actual, pos_correct)
-    # Save weights to a file
-    np.save("/weights/test_weights.npy", cmac.w)
-    print("New robot position:", new_pos)
+#     new_pos = cmac.cmac_function(vel, pos_actual, pos_correct)
+#     # Save weights to a file
+#     np.save("/Users/lucasorellana/Documents/stuff/DTU/4_semester/bioinspired/bio-inspired-control/final_project/version2/weights/test_weights.npy", cmac.w)
+#     print("New robot position:", new_pos)
