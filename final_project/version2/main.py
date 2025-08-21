@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 
 fable = Fable(robot_connected=True, camera_connected=True, camera_index=0)
 
+errors = []
+
 # while True:
 #     coords, frame_coords, frame = fable.detectBall()
 
@@ -33,21 +35,23 @@ enable_cmac = True
 weighting_factor = 0.2
 n_rfs = 10
 lim = 100
+load_weights = False
 
 xmin = [-lim, -lim, -lim]
 xmax = [lim, lim, lim]
 cmac = CMAC3D(n_rfs, xmin, xmax, beta=1e-2)
 
-try:
-    cmac.w = np.load(f"weights/lucas_wf{weighting_factor}_nrf{n_rfs}_lim{lim}.npy")
-except:
-    print("No weights found")
+if load_weights:
+    try:
+        cmac.w = np.load(f"weights/lucas_wf{weighting_factor}_nrf{n_rfs}_lim{lim}.npy")
+    except:
+        print("No weights found")
 
 while True:
     coords, frame_coords, frame = fable.detectBall()
 
     if coords and frame_coords:
-
+        errors.append([frame_coords[0], frame_coords[1]])
         if enable_cmac:
             vel = fable.calculate_velocities()
             error = fable.positional_error(coords)
@@ -58,6 +62,7 @@ while True:
                 fable.setLaserPosition(
                     [position[0], position[1], position[2]], add_CMAC=False
                 )
+
         else:
             fable.setLaserPosition([coords[0], coords[1], coords[2]], add_CMAC=False)
 
@@ -68,3 +73,28 @@ while True:
         np.save(f"weights/lucas_wf{weighting_factor}_nrf{n_rfs}_lim{lim}.npy", cmac.w)
         cmac.plot_weight_history()
         break
+
+# Improved error plot
+plt.figure(figsize=(12, 6))
+
+# Separate x and y errors
+x_errors = [error[0] for error in errors]
+y_errors = [error[1] for error in errors]
+
+plt.subplot(2, 1, 1)
+plt.plot(x_errors, label="X Error", color="tab:red", linewidth=2)
+plt.title("X Error Over Time", fontsize=16)
+plt.ylabel("X Error (pixels)", fontsize=14)
+plt.grid(True, linestyle="--", alpha=0.6)
+plt.legend()
+
+plt.subplot(2, 1, 2)
+plt.plot(y_errors, label="Y Error", color="tab:blue", linewidth=2)
+plt.title("Y Error Over Time", fontsize=16)
+plt.xlabel("Frame", fontsize=14)
+plt.ylabel("Y Error (pixels)", fontsize=14)
+plt.grid(True, linestyle="--", alpha=0.6)
+plt.legend()
+
+plt.tight_layout()
+plt.show()
