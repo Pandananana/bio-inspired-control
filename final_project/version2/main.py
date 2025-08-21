@@ -31,11 +31,11 @@ errors = []
 
 
 ## Lucas's code
-enable_cmac = True
-weighting_factor = 0.2
+enable_cmac = False
+weighting_factor = 0.3
 n_rfs = 10
 lim = 100
-load_weights = False
+load_weights = True
 
 xmin = [-lim, -lim, -lim]
 xmax = [lim, lim, lim]
@@ -71,7 +71,7 @@ while True:
     # Close and save weights
     if cv2.waitKey(1) & 0xFF == ord("q"):
         np.save(f"weights/lucas_wf{weighting_factor}_nrf{n_rfs}_lim{lim}.npy", cmac.w)
-        cmac.plot_weight_history()
+        # cmac.plot_weight_history()
         break
 
 # Improved error plot

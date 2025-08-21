@@ -57,31 +57,15 @@ class CMAC3D:
 
         for out in range(3):
             ax = axes[out]
-            # Plot a subset of weights to avoid overcrowding
-            # We'll plot weights along the diagonal and some key positions
-            for i in range(min(5, self.n_rfs)):  # Limit to first 5 RFs for clarity
-                for j in range(min(5, self.n_rfs)):
-                    for k in range(min(5, self.n_rfs)):
-                        if i == j and j == k:  # Diagonal weights
-                            ax.plot(
-                                range(timesteps),
-                                w_hist[:, i, j, k, out],
-                                label=f"w[{out},{i},{j},{k}]",
-                                alpha=0.8,
-                                linewidth=2,
-                            )
-                        elif (
-                            (i == 0 and j == 0)
-                            or (i == 0 and k == 0)
-                            or (j == 0 and k == 0)
-                        ):  # Edge weights
-                            ax.plot(
-                                range(timesteps),
-                                w_hist[:, i, j, k, out],
-                                label=f"w[{out},{i},{j},{k}]",
-                                alpha=0.6,
-                                linewidth=1,
-                            )
+            for i in range(self.n_rfs):
+                for j in range(self.n_rfs):
+                    for k in range(self.n_rfs):
+                        ax.plot(
+                            range(timesteps),
+                            w_hist[:, i, j, k, out],
+                            label=f"w[{i},{j},{k},{out}]",
+                            alpha=0.6,
+                        )
 
             ax.set_title(f"Weight History for Output {out + 1} (X, Y, Z)")
             ax.set_ylabel("Weight Value")
