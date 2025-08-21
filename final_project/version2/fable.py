@@ -239,9 +239,44 @@ class Fable:
         return distance
 
     def error_point_to_middle_frame(self, X, Y):
-        # Calculate the Euclidean distance from (X, Y) to (0, 0)
+        # Calculate the distance from (X, Y) to (0, 0)
         return [X - 0, Y - 0]
 
+    def plot_velocity_history(self):
+        """
+        Plot the velocity history of the ball in 3D space
+        """
+        if not self.ball_history or len(self.ball_history) < 2:
+            print("No velocity to plot")
+            return
+
+        # Convert list of tuples to numpy array for indexing
+        ball_history_array = np.array(self.ball_history)
+
+        # Calculate velocities
+        velocities = np.zeros_like(ball_history_array)
+        velocities[0] = np.diff(ball_history_array, axis=0)
+        velocities[1] = np.diff(ball_history_array, axis=1)
+        velocities[2] = np.diff(ball_history_array, axis=2)
+
+        # Create 3 Plots
+        fig, axs = plt.subplots(3, 1, figsize=(10, 15), sharex=True)
+        axs[0].plot(velocities[:, 0], label="Velocity X")
+        axs[0].set_ylabel("Velocity X (cm/s)")
+        axs[0].set_title("Velocity in X Direction Over Time")
+        axs[0].legend()
+        axs[1].plot(velocities[:, 1], label="Velocity Y", color="orange")
+        axs[1].set_ylabel("Velocity Y (cm/s)")
+        axs[1].set_title("Velocity in Y Direction Over Time")
+        axs[1].legend()
+        axs[2].plot(velocities[:, 2], label="Velocity Z", color="green")
+        axs[2].set_ylabel("Velocity Z (cm/s)")
+        axs[2].set_xlabel("Time Step")
+        axs[2].set_title("Velocity in Z Direction Over Time")
+        axs[2].legend()
+        plt.tight_layout()
+        plt.show()
+    
     def plot_ball_history(self):
         """
         Make a 3D plot of the ball history with temporal coloring
