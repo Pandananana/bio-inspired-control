@@ -55,12 +55,6 @@ class Fable:
 
         api.setPos(tau_1, tau_2, self.module)
 
-        # Wait until both motors stop moving
-        while api.getMoving(0, self.module) or api.getMoving(1, self.module):
-            time.sleep(0.01)  # Small delay to avoid busy waiting
-
-        self.getMotorAngles()
-
     def getMotorAngles(self):
         # Exit if not connected
         if not self.robot_connected:
