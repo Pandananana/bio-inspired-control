@@ -76,8 +76,26 @@ class Fable:
 
         return angle0, angle1
 
-    def setLaserPosition(self, position):
+    def setLaserPosition(self, position, add_CMAC = False):
+        #Angles are sum of Inverse Kinematics and CMAC prediction
+        if not self.robot_connected:
+            return
+        
+        # Convert position to angles
         angles = self.inverseKinematics(position)
+
+        # Add CMAC prediction to angles
+        cmac_prediction = self.cmac.predict(position[0], position[1])
+
+        # Set the motor angles
+        if add_CMAC:
+            angles[0] += cmac_prediction[0]
+            angles[1] += cmac_prediction[1]
+
+        # Limit the angles to the range [-pi, pi]
+        angles[0] = np.clip(angles[0], -np.pi, np.pi)
+        angles[1] = np.clip(angles[1], -np.pi, np.pi)   
+
         self.setMotorAngles(np.rad2deg(angles[0]), np.rad2deg(angles[1]))
 
     def inverseKinematics(self, point):

@@ -7,7 +7,7 @@ def GaussianBasisFunction(x, mu, sigma):
 
 
 class CMAC:
-    def __init__(self, n_rfs, xmin, xmax, n_outputs=3, beta=0.1):
+    def __init__(self, n_rfs, xmin, xmax, n_outputs=3, beta=0.1, load_weights=False):
         """Initialize the basis function parameters and output weights"""
         self.n_rfs = n_rfs
         self.n_outputs = n_outputs
@@ -26,9 +26,14 @@ class CMAC:
             self.mu[k] = np.linspace(xmin[k], xmax[k], self.n_rfs)
 
         # Now w has shape (n_outputs, n_rfs, n_rfs)
-        self.w = np.random.normal(
-            loc=0.0, scale=0.2, size=(self.n_outputs, self.n_rfs, self.n_rfs)
-        )
+        if load_weights:
+            self.w = np.load("weights/cmac_weights.npy")
+        else:
+            # Initialize weights randomly
+            # Shape: (n_outputs, n_rfs, n_rfs)
+            self.w = np.random.normal(
+                loc=0.0, scale=0.2, size=(self.n_outputs, self.n_rfs, self.n_rfs)
+            )
 
         self.beta = beta
 
@@ -119,3 +124,6 @@ if __name__ == "__main__":
 
     # Plot the weight history
     cmac.plot_weight_history()
+
+    #Save weights to a file
+    np.save("weights/cmac_weights.npy", cmac.w)
