@@ -22,7 +22,13 @@ class Fable:
         if robot_connected:
             self.api.setup(blocking=True)
             moduleids = self.api.discoverModules()
-            self.module = moduleids[0] if moduleids else None
+            for m in moduleids:
+                if m.strip() == "2Q7":
+                    self.module = m
+                    break
+            if self.module is None:
+                print("No 2Q7 module found")
+                exit()
             self.getMotorAngles()
             print("Found modules: ", moduleids)
             print("Battery: ", self.getBattery())
