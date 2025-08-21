@@ -10,13 +10,11 @@ dependencies = [
     "scipy<1.9.0",
     "fableapi",
     "psutil",
-    "serial",
-    "pyserial",
     "matplotlib==3.7.3",
     "opencv-python",
     "ikpy",
-    "pinocchio",
     "jupyter",
+    "pyserial>=3.5",
 ]
 
 [tool.uv.sources]
