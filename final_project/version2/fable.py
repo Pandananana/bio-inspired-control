@@ -1,4 +1,5 @@
 import subprocess
+import time
 import numpy as np
 from FableAPI.fable_init import api
 from cmac import CMAC
@@ -41,6 +42,7 @@ class Fable:
         ## Storage
         self.ball_history = []
         self.angle_history = []
+        self.time_history = []
 
         # Add filter for Z values
         self.z_history = []
@@ -84,11 +86,11 @@ class Fable:
         # Convert position to angles
         angles = self.inverseKinematics(position)
 
-        # Add CMAC prediction to angles
-        cmac_prediction = self.cmac.predict(position[0], position[1])
-
         # Set the motor angles
         if add_CMAC:
+            # Add CMAC prediction to angles
+            cmac_prediction = self.cmac.predict(position[0], position[1])
+
             angles[0] += cmac_prediction[0]
             angles[1] += cmac_prediction[1]
 
@@ -220,6 +222,23 @@ class Fable:
             target_angles[1] - current_angles[1],
         ]
 
+    def calculate_velocities(self):
+        if len(self.ball_history) < 2 or len(self.time_history) < 2:
+            return None
+
+        # Get the last two positions and times
+        pos1 = np.array(self.ball_history[-2])
+        pos2 = np.array(self.ball_history[-1])
+        t1 = self.time_history[-2]
+        t2 = self.time_history[-1]
+
+        # Calculate velocity (position change per unit time)
+        dt = t2 - t1
+        if dt == 0:
+            return None  # Avoid division by zero
+        velocity = (pos2 - pos1) / dt
+        return velocity
+
     def getBattery(self):
         if not self.robot_connected:
             return None
@@ -250,6 +269,7 @@ class Fable:
                 camera_x, camera_y, camera_z
             )
             self.ball_history.append((global_x, global_y, global_z))
+            self.time_history.append(time.time())
             return (global_x, global_y, global_z), (x_norm, y_norm), frame
 
         except Exception as e:
