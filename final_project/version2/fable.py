@@ -1,6 +1,7 @@
 import subprocess
 import numpy as np
 from FableAPI.fable_init import api
+from cmac import CMAC
 from detect_ball import (
     locateV2,
     normalized_coordinates,
@@ -47,6 +48,11 @@ class Fable:
             10  # Number of previous values to keep for outlier detection
         )
         self.z_outlier_threshold = 2.0  # Standard deviations for outlier detection
+
+        ## CMAC
+        self.cmac = CMAC(
+            n_rfs=5, xmin=[-100, -100, -100], xmax=[100, 100, 100], n_outputs=2
+        )
 
     def setMotorAngles(self, tau_1, tau_2):
         # Exit if not connected

@@ -1,12 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from fable import Fable
+
 
 def GaussianBasisFunction(x, mu, sigma):
     return np.exp(-((x - mu) ** 2) / (sigma**2))
 
+
 class CMAC:
-    def __init__(self, n_rfs, xmin, xmax, n_outputs=3, beta=1e-3):
+    def __init__(self, n_rfs, xmin, xmax, n_outputs=3, beta=0.1):
         """Initialize the basis function parameters and output weights"""
         self.n_rfs = n_rfs
         self.n_outputs = n_outputs
@@ -68,12 +69,14 @@ class CMAC:
             self.w[out] += self.beta * e[out] * self.B
         self.w_history.append(self.w.copy())
         return self.w
-    
+
     def plot_weight_history(self):
         """Plot the history of all weights for all outputs"""
         w_hist = np.array(self.w_history)  # shape: (timesteps, n_outputs, n_rfs, n_rfs)
         timesteps = w_hist.shape[0]
-        fig, axes = plt.subplots(self.n_outputs, 1, figsize=(12, 4 * self.n_outputs), sharex=True)
+        fig, axes = plt.subplots(
+            self.n_outputs, 1, figsize=(12, 4 * self.n_outputs), sharex=True
+        )
 
         if self.n_outputs == 1:
             axes = [axes]  # Ensure axes is iterable
@@ -85,25 +88,28 @@ class CMAC:
                     ax.plot(
                         range(timesteps),
                         w_hist[:, out, i, j],
-                        label=f'w[{out},{i},{j}]',
-                        alpha=0.6
+                        label=f"w[{out},{i},{j}]",
+                        alpha=0.6,
                     )
-            ax.set_title(f'Weight History for Output {out + 1}')
-            ax.set_ylabel('Weight Value')
+            ax.set_title(f"Weight History for Output {out + 1}")
+            ax.set_ylabel("Weight Value")
             ax.grid(True)
             # Optionally, comment out the next line if too many weights:
             # ax.legend(fontsize='small', ncol=4, bbox_to_anchor=(1.05, 1), loc='upper left')
 
-        axes[-1].set_xlabel('Time Step')
+        axes[-1].set_xlabel("Time Step")
         plt.tight_layout()
         plt.show()
 
-#Example usage:
+
+# Example usage:
 if __name__ == "__main__":
+    from fable import Fable
+
     cmac = CMAC(n_rfs=5, xmin=[-100, -100, -100], xmax=[100, 100, 100], n_outputs=2)
     fable = Fable(robot_connected=True, camera_connected=True, camera_index=1)
 
-    xyz, _, _ = fable.detectBall() 
+    xyz, _, _ = fable.detectBall()
     yhat = cmac.predict(xyz[0], xyz[1])
     print("Predicted output:", yhat)
 
