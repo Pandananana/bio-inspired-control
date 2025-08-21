@@ -24,6 +24,6 @@ while True:
         break
 
 # Plot the weight history
-fable.cmac.plot_weight_history()
+# fable.cmac.plot_weight_history()
 # fable.plot_error_velocity_history(error)
 np.save("weights/cmac_weights.npy", fable.cmac.w)

@@ -76,11 +76,11 @@ class Fable:
 
         return angle0, angle1
 
-    def setLaserPosition(self, position, add_CMAC = False):
-        #Angles are sum of Inverse Kinematics and CMAC prediction
+    def setLaserPosition(self, position, add_CMAC=False):
+        # Angles are sum of Inverse Kinematics and CMAC prediction
         if not self.robot_connected:
             return
-        
+
         # Convert position to angles
         angles = self.inverseKinematics(position)
 
@@ -94,7 +94,7 @@ class Fable:
 
         # Limit the angles to the range [-pi, pi]
         angles[0] = np.clip(angles[0], -np.pi, np.pi)
-        angles[1] = np.clip(angles[1], -np.pi, np.pi)   
+        angles[1] = np.clip(angles[1], -np.pi, np.pi)
 
         self.setMotorAngles(np.rad2deg(angles[0]), np.rad2deg(angles[1]))
 
@@ -177,6 +177,35 @@ class Fable:
         current_position = self.forwardKinematics(
             [current_angles[0], current_angles[1], 0]
         )
+
+        # Extract the 4x4 transformation matrix from SE3 object
+        transform_matrix = (
+            current_position.A
+        )  # or current_position.data[0] depending on spatialmath version
+
+        # Extract camera position from homogeneous transformation matrix
+        camera_pos = transform_matrix[:3, 3]  # Extract translation (x, y, z)
+
+        # Extract camera direction (assuming it's the Z-axis of the camera frame)
+        camera_direction = transform_matrix[:3, 2]  # Z-axis direction
+
+        # Convert target_position to numpy array if it isn't already
+        ball_pos = np.array(target_position)
+
+        # Calculate vector from camera to ball
+        camera_to_ball = ball_pos - camera_pos
+
+        # Project onto camera centerline
+        # t = dot product of (ball - camera) with camera direction
+        t = np.dot(camera_to_ball, camera_direction)
+
+        # Find closest point on camera centerline
+        closest_point_on_centerline = camera_pos + t * camera_direction
+
+        # Calculate perpendicular error vector
+        error_vector = ball_pos - closest_point_on_centerline
+
+        return error_vector
 
     def angle_error(self, target_position):
         """
