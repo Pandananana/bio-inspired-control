@@ -33,7 +33,7 @@ n_rfs = 7
 xmin = [-200, -200, -200]
 xmax = [200, 200, 200]
 cmac = CMAC3D(n_rfs, xmin, xmax, beta=1e-2)
-# cmac.w = np.load("/Users/lucasorellana/Documents/stuff/DTU/4_semester/bioinspired/bio-inspired-control/final_project/version2/weights/test_weights.npy")
+cmac.w = np.load("weights/lucas_weights.npy")
 
 while True:
     coords, frame_coords, frame = fable.detectBall()
@@ -43,8 +43,11 @@ while True:
         error = fable.positional_error(coords)
         if vel is not None and error is not None:
             new_pos = cmac.cmac_function(vel, error)
-
-        fable.setLaserPosition([coords[0], coords[1], coords[2]], add_CMAC=False)
+            delta_pos = (new_pos - coords) * 0.1
+            position = coords + delta_pos
+            fable.setLaserPosition(
+                [position[0], position[1], position[2]], add_CMAC=False
+            )
 
     fable.showFrame(frame)
     if cv2.waitKey(1) & 0xFF == ord("q"):
