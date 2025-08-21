@@ -1,7 +1,4 @@
 from fable import Fable
-from spatialmath import SE3
-import numpy as np
-import time
 import cv2
 from cmac import CMAC
 import matplotlib.pyplot as plt
