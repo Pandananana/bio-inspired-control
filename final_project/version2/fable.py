@@ -240,32 +240,57 @@ class Fable:
         velocities = np.diff(ball_history_array, axis=0)  # Shape: (n-1, 3)
 
         # Create 3 Plots
-        fig, axs = plt.subplots(3, 1, figsize=(10, 15), sharex=True)
+        fig, axs = plt.subplots(4, 1, figsize=(10, 15), sharex=True)
 
         # Plot X velocity
         axs[0].plot(velocities[:, 0], label="Velocity X")
-        axs[0].plot(error[:], label="Error", color="red")
         axs[0].set_ylabel("Velocity X (cm/s)")
         axs[0].set_title("Velocity in X Direction Over Time")
         axs[0].legend()
 
+        # Add secondary y-axis for error on the right
+        ax_error_x = axs[0].twinx()
+        ax_error_x.plot(error[:], label="Error", color="red")
+        ax_error_x.set_ylabel("Error", color="red")
+        ax_error_x.tick_params(axis="y", labelcolor="red")
+
         # Plot Y velocity
         axs[1].plot(velocities[:, 1], label="Velocity Y", color="orange")
-        axs[1].plot(error[:], label="Error", color="red")
         axs[1].set_ylabel("Velocity Y (cm/s)")
         axs[1].set_title("Velocity in Y Direction Over Time")
         axs[1].legend()
 
+        # Add secondary y-axis for error on the right
+        ax_error_y = axs[1].twinx()
+        ax_error_y.plot(error[:], label="Error", color="red")
+        ax_error_y.set_ylabel("Error", color="red")
+        ax_error_y.tick_params(axis="y", labelcolor="red")
+
         # Plot Z velocity
         axs[2].plot(velocities[:, 2], label="Velocity Z", color="green")
-        axs[2].plot(error[:], label="Error", color="red")
         axs[2].set_ylabel("Velocity Z (cm/s)")
         axs[2].set_xlabel("Time Step")
         axs[2].set_title("Velocity in Z Direction Over Time")
         axs[2].legend()
 
-        plt.tight_layout()
-        plt.show()
+        # Add secondary y-axis for error on the right
+        ax_error_z = axs[2].twinx()
+        ax_error_z.plot(error[:], label="Error", color="red")
+        ax_error_z.set_ylabel("Error", color="red")
+        ax_error_z.tick_params(axis="y", labelcolor="red")
+
+        # Plot magnitude of velocity
+        velocity_magnitude = np.linalg.norm(velocities, axis=1)
+        axs[3].plot(velocity_magnitude, label="Velocity Magnitude")
+        axs[3].set_ylabel("Velocity Magnitude (cm/s)")
+        axs[3].set_title("Velocity Magnitude Over Time")
+        axs[3].legend()
+
+        # Add secondary y-axis for error on the right
+        ax_error_v = axs[3].twinx()
+        ax_error_v.plot(error[:], label="Error", color="red")
+        ax_error_v.set_ylabel("Error", color="red")
+        ax_error_v.tick_params(axis="y", labelcolor="red")
 
         # Get current git commit hash
         commit_hash = (
@@ -276,6 +301,8 @@ class Fable:
 
         # Save the plot in folder plots with commit hash in filename
         plt.savefig(f"plots/error_history_{commit_hash}.png")
+        plt.tight_layout()
+        plt.show()
 
     def plot_ball_history(self):
         """
