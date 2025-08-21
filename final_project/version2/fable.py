@@ -97,6 +97,49 @@ class Fable:
         homotrans = self.robot.forward_kinematics(angles)
         return SE3(homotrans)
 
+    def ball_to_camera_coordinates(self, x_norm, y_norm, radius):
+        """Convert normalized coordinates to camera coordinates"""
+
+        if radius > 0:
+            real_radius = 20  # mm
+            f = camera_matrix[0, 0]  # Focal length from camera matrix
+            Z = f * real_radius / radius  # Calculate depth based on radius
+            Z = Z / 10  # Convert to cm
+
+            # Apply outlier detection and filtering to Z
+            Z_filtered = self._filter_z_outlier(Z)
+
+            # x_norm and y_norm are already normalized coordinates from undistortPoints
+            cam_x = x_norm * Z_filtered
+            cam_y = y_norm * Z_filtered
+
+            return cam_x, cam_y, Z_filtered
+        else:
+            raise ValueError("Invalid radius: must be greater than 0")
+
+    def camera_to_global_coordinates(self, X, Y, Z):
+        """
+        Convert camera coordinates (X,Y,Z) to global coordinates.
+        T_cam_ee : extrinsic transform from end-effector to camera (default identity if aligned)
+        """
+
+        # Extrinsic transform from end-effector to camera
+        # Camera is 2cm above the end-effector, 7cm in front of the end-effector
+        T_cam_ee = SE3(2, 0, 4.5) * SE3.RPY(0, 0, np.deg2rad(180))
+
+        # Point in camera frame (convert from mm to cm)
+        p_cam = SE3(X, Y, Z)
+
+        # Get latest angles
+        self.angles = self.getMotorAngles()
+
+        # End-effector pose in global frame
+        T_world_ee = self.forwardKinematics([self.angles[0], self.angles[1], 0])
+
+        # Transform point to global frame
+        p_global = T_world_ee * T_cam_ee * p_cam
+        return p_global.t[:3]
+
     def getBattery(self):
         if not self.robot_connected:
             return None
@@ -133,26 +176,6 @@ class Fable:
             print(e)
             # print("Ball not found")
             return None, None, frame
-
-    def ball_to_camera_coordinates(self, x_norm, y_norm, radius):
-        """Convert normalized coordinates to camera coordinates"""
-
-        if radius > 0:
-            real_radius = 20  # mm
-            f = camera_matrix[0, 0]  # Focal length from camera matrix
-            Z = f * real_radius / radius  # Calculate depth based on radius
-            Z = Z / 10  # Convert to cm
-
-            # Apply outlier detection and filtering to Z
-            Z_filtered = self._filter_z_outlier(Z)
-
-            # x_norm and y_norm are already normalized coordinates from undistortPoints
-            cam_x = x_norm * Z_filtered
-            cam_y = y_norm * Z_filtered
-
-            return cam_x, cam_y, Z_filtered
-        else:
-            raise ValueError("Invalid radius: must be greater than 0")
 
     def _filter_z_outlier(self, new_z):
         """Filter out outliers using statistical methods"""
@@ -191,29 +214,6 @@ class Fable:
             z_filtered = new_z
 
         return z_filtered
-
-    def camera_to_global_coordinates(self, X, Y, Z):
-        """
-        Convert camera coordinates (X,Y,Z) to global coordinates.
-        T_cam_ee : extrinsic transform from end-effector to camera (default identity if aligned)
-        """
-
-        # Extrinsic transform from end-effector to camera
-        # Camera is 2cm above the end-effector, 7cm in front of the end-effector
-        T_cam_ee = SE3(2, 0, 4.5) * SE3.RPY(0, 0, np.deg2rad(180))
-
-        # Point in camera frame (convert from mm to cm)
-        p_cam = SE3(X, Y, Z)
-
-        # Get latest angles
-        self.angles = self.getMotorAngles()
-
-        # End-effector pose in global frame
-        T_world_ee = self.forwardKinematics([self.angles[0], self.angles[1], 0])
-
-        # Transform point to global frame
-        p_global = T_world_ee * T_cam_ee * p_cam
-        return p_global.t[:3]
 
     def error_point_to_middle_frame(self, X, Y):
         """
