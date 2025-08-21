@@ -238,10 +238,6 @@ class Fable:
         distance = np.linalg.norm(np.cross(v, direction)) / np.linalg.norm(direction)
         return distance
 
-    def error_point_to_middle_frame(self, X, Y):
-        # Calculate the distance from (X, Y) to (0, 0)
-        return [X - 0, Y - 0]
-
     def plot_velocity_history(self):
         """
         Plot the velocity history of the ball in 3D space
@@ -276,7 +272,7 @@ class Fable:
         axs[2].legend()
         plt.tight_layout()
         plt.show()
-    
+
     def plot_ball_history(self):
         """
         Make a 3D plot of the ball history with temporal coloring
